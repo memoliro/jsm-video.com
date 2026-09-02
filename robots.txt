@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /ffmpeg/
+Disallow: /*?*
+Disallow: /cdn-cgi/
+
+Sitemap: https://freeonlineconverters.cc/sitemap.xml
