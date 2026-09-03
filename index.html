@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6QJX3F5R3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-Q6QJX3F5R3');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Convert, Rotate & Flip, Mute Video - Private and Free Online. No uploads, no tracking. Free MP4, MOV, MP3, WAV, AAC, FLAC converter.">
@@ -1420,47 +1429,43 @@ document.getElementById('vFlipV')?.addEventListener('change', updateVPreviewTran
 setupDrop(vDrop, vInput, addVFiles);
 </script>
 
-<!-- Consent Banner - Simple -->
+<!-- Consent Banner - Single Accept, remembers forever -->
 <div id="consentBanner" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:9999;gap:12px;align-items:center;flex-wrap:wrap">
-  <div style="flex:1;min-width:220px;font-size:0.9rem">We use cookies for analytics and ads if you accept. <a href="/privacy-policy.html">Privacy policy</a><span class="badge" style="margin-left:12px">100% Private</span></div>
-  <div style="display:flex;gap:8px">
-    <button id="consentReject" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text)">Reject</button>
-    <button id="consentAccept" style="padding:8px 14px;border-radius:8px;border:0;background:var(--primary);color:white;cursor:pointer">Accept</button>
-  </div>
+  <div style="flex:1;min-width:220px;font-size:0.9rem">We use cookies for analytics and ads to improve your experience. <a href="/privacy.html">Privacy policy</a></div>
+  <button id="consentAccept" style="padding:10px 18px;border-radius:10px;border:0;background:#2563eb;color:white;font-weight:700;cursor:pointer">Accept</button>
 </div>
+
 <script>
 (function(){
   function loadAllAds(){
     try{
-      var ads = document.querySelectorAll('.adsbygoogle');
-      ads.forEach(function(){
-        if(!this.getAttribute('data-adsbygoogle-status')){
+      document.querySelectorAll('.adsbygoogle').forEach(function(el){
+        if(!el.getAttribute('data-adsbygoogle-status')){
           (adsbygoogle = window.adsbygoogle || []).push({});
         }
       });
-    }catch(e){ console.warn('ads load', e); }
+    }catch(e){}
   }
-  // If consent already given, load ads immediately
-  if(localStorage.getItem('consent_choice')==='accepted'){
-    loadAllAds();
-  }
+
   var banner = document.getElementById('consentBanner');
-  if(!localStorage.getItem('consent_choice') && banner){
+  var btn = document.getElementById('consentAccept');
+
+  // If already accepted before, never show again
+  if(localStorage.getItem('consent_accepted')==='1'){
+    banner.style.display='none';
+    gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    loadAllAds();
+  } else {
+    // Not accepted yet = stays on screen until they click
     banner.style.display='flex';
   }
-  function setConsent(granted){
-    var v = granted ? 'granted' : 'denied';
-    gtag('consent','update',{ad_storage:v, ad_user_data:v, ad_personalization:v, analytics_storage:v});
-    localStorage.setItem('consent_choice', granted ? 'accepted' : 'rejected');
-    if(banner) banner.style.display='none';
-    if(granted){ loadAllAds(); }
-  }
-  var acc = document.getElementById('consentAccept');
-  var rej = document.getElementById('consentReject');
-  if(acc) acc.onclick = function(){ setConsent(true); };
-  if(rej) rej.onclick = function(){ setConsent(false); };
-  // Expose for Funding Choices later
-  window.__setConsent = setConsent;
+
+  btn.onclick = function(){
+    gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
+    localStorage.setItem('consent_accepted','1'); // remembers forever
+    banner.style.display='none';
+    loadAllAds();
+  };
 })();
 </script>
 
