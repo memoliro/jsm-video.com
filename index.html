@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6QJX3F5R3"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-Q6QJX3F5R3');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Convert, Rotate & Flip, Mute Video - Private and Free Online. No uploads, no tracking. Free MP4, MOV, MP3, WAV, AAC, FLAC converter.">
@@ -81,29 +72,39 @@
 })();
 </script>
 
+<!-- =========================================================
+     GOOGLE CONSENT MODE + ADSENSE
+     Consent is denied by default. AdSense requests remain paused
+     until the visitor clicks Accept.
+     ========================================================= -->
 <script>
-// 2. Consent Mode v2 default - MUST be before gtag and adsbygoogle
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('consent','default',{
-    ad_storage:'denied',
-    ad_user_data:'denied',
-    ad_personalization:'denied',
-    analytics_storage:'denied',
-    functionality_storage:'granted',
-    security_storage:'granted'
+
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'granted',
+    security_storage: 'granted',
+    wait_for_update: 500
   });
 </script>
 
-<!-- Google tag (gtag.js) -->
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6QJX3F5R3"></script>
 <script>
   gtag('js', new Date());
   gtag('config', 'G-Q6QJX3F5R3', { anonymize_ip: true });
 </script>
 
-<!-- AdSense - load ONCE only -->
+<!-- Google AdSense - load once -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4747106371991816" crossorigin="anonymous"></script>
+<script>
+  /* Official Google-supported mechanism for delaying AdSense requests. */
+  (adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1;
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -676,7 +677,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
         <h2 class="section-title">Frequently Asked Questions</h2>
         <div style="display:flex;flex-direction:column;gap:18px;margin-top:16px">
           <div><strong>Are my files uploaded?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">No. 100% local processing with ffmpeg.wasm. No upload endpoint exists. Your video never leaves your device. Perfect for private files.</p></div>
-          <div><strong>Is it free? Any watermark?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Free forever, no watermark, no account. We are supported by ads only after you click Accept. Reject = no ads cookies, limited ads.</p></div>
+          <div><strong>Is it free? Any watermark?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Free forever, no watermark, no account. We are supported by ads. Advertising and analytics remain disabled until you click Accept.</p></div>
           <div><strong>What is the max file size?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Best under 500 MB. Hard limit 1 GB for browser stability. For larger files, use Handbrake or Shutter Encoder desktop tools.</p></div>
           <div><strong>Which formats?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Video: MP4, MOV, MKV, WebM, AVI, FLV, WMV, M4V, 3GP, MPG, TS, MTS, MXF, GIF. Audio: MP3, WAV, AAC, OGG, FLAC, M4A, WMA, OPUS, AIFF, ALAC. Plus rotate, flip, compress, mute.</p></div>
           <div><strong>Why is first load slow?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Engine is ~25 MB WASM, cached after first load. Second conversion starts instantly. We show progress bar.</p></div>
@@ -762,6 +763,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
         <a href="/terms.html">Terms</a>
         <a href="/about.html">About</a>
         <a href="/contact.html">Contact</a>
+        <a href="#" id="cookieSettingsBtn">Cookie Settings</a>
         <a href="#articles">Articles</a>
       </div>
     </div>
@@ -1429,46 +1431,145 @@ document.getElementById('vFlipV')?.addEventListener('change', updateVPreviewTran
 setupDrop(vDrop, vInput, addVFiles);
 </script>
 
-<!-- Consent Banner - Single Accept, remembers forever -->
-<div id="consentBanner" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:9999;gap:12px;align-items:center;flex-wrap:wrap">
-  <div style="flex:1;min-width:220px;font-size:0.9rem">We use cookies for analytics and ads to improve your experience. <a href="/privacy.html">Privacy policy</a></div>
-  <button id="consentAccept" style="padding:10px 18px;border-radius:10px;border:0;background:#2563eb;color:white;font-weight:700;cursor:pointer">Accept</button>
+<!-- =========================================================
+     CONSENT BANNER
+     Accept-only design. No Accept = no AdSense requests.
+     ========================================================= -->
+<div id="consentBanner"
+     role="dialog"
+     aria-label="Cookie and advertising consent"
+     aria-describedby="consentText"
+     style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:9999;gap:12px;align-items:center;flex-wrap:wrap">
+  <div id="consentText" style="flex:1;min-width:240px;font-size:0.9rem;line-height:1.5">
+    We use cookies and similar technologies for analytics and advertising.
+    If you click <strong>Accept</strong>, information about your use of this site may be
+    shared with Google for <strong>ads personalization</strong> and measurement.
+    You can continue using JSM-Video without accepting.
+    <a href="/privacy-policy.html">Privacy policy</a> ·
+    <a href="https://business.safety.google/privacy/" target="_blank" rel="noopener noreferrer">Google data use</a>
+  </div>
+  <button id="consentAccept"
+          type="button"
+          style="padding:10px 18px;border-radius:10px;border:0;background:#2563eb;color:white;font-weight:700;cursor:pointer;white-space:nowrap">
+    Accept
+  </button>
 </div>
 
 <script>
-(function(){
-  function loadAllAds(){
-    try{
-      document.querySelectorAll('.adsbygoogle').forEach(function(el){
-        if(!el.getAttribute('data-adsbygoogle-status')){
-          (adsbygoogle = window.adsbygoogle || []).push({});
-        }
+(function () {
+  'use strict';
+
+  const CONSENT_KEY = 'jsm_video_consent_v2';
+  const banner = document.getElementById('consentBanner');
+  const acceptButton = document.getElementById('consentAccept');
+
+  function initializeAds() {
+    const ads = document.querySelectorAll('ins.adsbygoogle');
+
+    ads.forEach(function (ad) {
+      if (ad.dataset.adsInitialized === '1' || ad.getAttribute('data-adsbygoogle-status')) {
+        return;
+      }
+
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        ad.dataset.adsInitialized = '1';
+      } catch (error) {
+        console.error('[AdSense] Failed to initialize ad slot:', error);
+      }
+    });
+  }
+
+  function grantConsent() {
+    try {
+      gtag('consent', 'update', {
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted',
+        analytics_storage: 'granted'
       });
-    }catch(e){}
+    } catch (error) {
+      console.error('[Consent] Failed to update Google consent:', error);
+    }
+
+    try {
+      localStorage.setItem(CONSENT_KEY, '1');
+    } catch (error) {
+      console.warn('[Consent] Could not save consent:', error);
+    }
+
+    if (banner) {
+      banner.style.display = 'none';
+    }
+
+    /* Resume AdSense requests after consent. */
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 0;
+    } catch (error) {
+      console.error('[AdSense] Could not resume ad requests:', error);
+    }
+
+    initializeAds();
   }
 
-  var banner = document.getElementById('consentBanner');
-  var btn = document.getElementById('consentAccept');
+  function restoreAcceptedConsent() {
+    try {
+      gtag('consent', 'update', {
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted',
+        analytics_storage: 'granted'
+      });
+    } catch (error) {
+      console.error('[Consent] Failed to restore Google consent:', error);
+    }
 
-  // If already accepted before, never show again
-  if(localStorage.getItem('consent_accepted')==='1'){
-    banner.style.display='none';
-    gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
-    loadAllAds();
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 0;
+    } catch (error) {
+      console.error('[AdSense] Could not resume ad requests:', error);
+    }
+
+    initializeAds();
+  }
+
+  let accepted = false;
+  try {
+    accepted = localStorage.getItem(CONSENT_KEY) === '1';
+  } catch (error) {
+    console.warn('[Consent] Could not read saved consent:', error);
+  }
+
+  if (accepted) {
+    if (banner) banner.style.display = 'none';
+    restoreAcceptedConsent();
   } else {
-    // Not accepted yet = stays on screen until they click
-    banner.style.display='flex';
+    /* No consent: keep AdSense paused and show the notice. */
+    if (banner) banner.style.display = 'flex';
   }
 
-  btn.onclick = function(){
-    gtag('consent','update',{ad_storage:'granted', ad_user_data:'granted', ad_personalization:'granted', analytics_storage:'granted'});
-    localStorage.setItem('consent_accepted','1'); // remembers forever
-    banner.style.display='none';
-    loadAllAds();
-  };
+  if (acceptButton) {
+    acceptButton.addEventListener('click', grantConsent);
+  }
+
+  /*
+   * Cookie settings link: lets an accepted visitor withdraw consent.
+   * The page reloads so all AdSense slots return to the paused state.
+   */
+  const cookieSettings = document.getElementById('cookieSettingsBtn');
+  if (cookieSettings) {
+    cookieSettings.addEventListener('click', function (event) {
+      event.preventDefault();
+      try {
+        localStorage.removeItem(CONSENT_KEY);
+      } catch (error) {
+        console.warn('[Consent] Could not clear saved consent:', error);
+      }
+      window.location.reload();
+    });
+  }
 })();
 </script>
-
 
 <script>
 // PWA install
