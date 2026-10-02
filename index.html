@@ -602,6 +602,12 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer"><input type="checkbox" id="vFlipH"> <span>↔ Flip H</span></label>
             <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer"><input type="checkbox" id="vFlipV"> <span>↕ Flip V</span></label>
             <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer"><input type="checkbox" id="removeAudioToggle"> <span>🔇 Remove audio</span></label>
+            <span style="font-weight:600">Quality:</span>
+            <select id="qualityMode" title="Smaller file converts faster with lower quality; High quality is slower with larger files." style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px">
+              <option value="small">📦 Smaller file</option>
+              <option value="balanced" selected>⚖️ Balanced</option>
+              <option value="high">🎬 High quality</option>
+            </select>
           </div>
           <div id="webcodecsStatus" style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px"></div>
           <div class="privacy-pills">
@@ -1323,7 +1329,8 @@ async function convertV(id) {
     const safeName = item.file.name.replace(/[^\w.-]/g, '_').slice(0, 80);
     inName = `in-${id}-${safeName}`; outName = `converted-${Date.now()}.${item.out}`;
     await ffmpeg.writeFile(inName, await fetchFile(item.file));
-    const speedMode = (document.getElementById('speedMode')?.value) || 'fast';
+    const rawQ = (document.getElementById('qualityMode')?.value) || (document.getElementById('speedMode')?.value) || 'balanced';
+    const qmode = rawQ === 'fast' ? 'small' : rawQ === 'quality' ? 'high' : rawQ; // legacy speedMode values
     const resolution = (document.getElementById('vResolution')?.value) || 'original';
     const vRotate = (document.getElementById('vRotate')?.value) || '0';
     const vFlipH = document.getElementById('vFlipH')?.checked || false;
@@ -1342,9 +1349,10 @@ async function convertV(id) {
       return filters.length ? filters.join(',') : null;
     };
     const scaleFilter = getVideoFilters();
-    const preset = speedMode === 'fast' ? 'ultrafast' : speedMode === 'quality' ? 'medium' : 'veryfast';
-    const crf = speedMode === 'fast' ? '28' : speedMode === 'quality' ? '20' : '23';
-    const audioBR = speedMode === 'fast' ? '128k' : '192k';
+    const preset = qmode === 'small' ? 'ultrafast' : qmode === 'high' ? 'medium' : 'veryfast';
+    const crf = qmode === 'small' ? '30' : qmode === 'high' ? '19' : '24';
+    const audioBR = qmode === 'small' ? '96k' : qmode === 'high' ? '192k' : '128k';
+    const mp3q = qmode === 'small' ? '5' : qmode === 'high' ? '2' : '4';
     const videoExts = ['mp4','mov','mkv','webm','avi','flv','wmv','m4v','3gp','mpg','mpeg','ts','mts','mxf','gif'];
     const audioExts = ['mp3','wav','aac','ogg','flac','m4a','wma','opus','aiff','alac'];
     const isVideoOut = videoExts.includes(item.out);
@@ -1375,7 +1383,7 @@ async function convertV(id) {
       args = ['-i', inName];
       if (isAudioOut) {
         args.push('-vn');
-        if (item.out === 'mp3') args.push('-c:a', 'libmp3lame', '-q:a', speedMode==='fast'?'4':'2');
+        if (item.out === 'mp3') args.push('-c:a', 'libmp3lame', '-q:a', mp3q);
         else if (item.out === 'wav' || item.out === 'aiff') args.push('-c:a', 'pcm_s16le');
         else if (item.out === 'aac' || item.out === 'm4a') args.push('-c:a', 'aac', '-b:a', audioBR);
         else if (item.out === 'ogg' || item.out === 'opus') args.push('-c:a', item.out==='opus'?'libopus':'libvorbis', '-b:a', audioBR);
