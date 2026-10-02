@@ -1056,16 +1056,25 @@ function addVFiles(list) {
   renderV();
 }
 
+function fmtSize(bytes){
+  if(!Number.isFinite(bytes) || bytes < 0) return '—';
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1048576) return (bytes/1024).toFixed(0) + ' KB';
+  if(bytes < 1073741824) return (bytes/1048576).toFixed(1) + ' MB';
+  return (bytes/1073741824).toFixed(2) + ' GB';
+}
+
 function renderV() {
   vList.innerHTML = '';
   const item = vFiles[0];
   if (!item) { vDrop.classList.remove('hidden'); vPreviewArea.classList.remove('show'); return; }
   vDrop.classList.add('hidden');
   vPreviewArea.classList.add('show');
-  const sizeMB = (item.file.size / 1024 / 1024).toFixed(1);
   const div = document.createElement('div');
   div.className = 'fileCard';
   const statusClass = `status-${item.status}`;
+  const inSize = fmtSize(item.file.size);
+  const sizeHtml = (item.status === 'done' && item.outSize) ? `${inSize} → <b>${fmtSize(item.outSize)}</b>` : inSize;
   const thumbHtml = item.isAudio
     ? '<div class="fileThumb audio" aria-hidden="true" title="Audio file">🎵</div>'
     : `<video class="fileThumb" src="${item.previewUrl}" muted playsinline preload="metadata" data-preview="${item.previewUrl}" data-name="${escapeHtml(item.file.name)}" title="Click to play preview"></video>`;
@@ -1075,7 +1084,7 @@ function renderV() {
   const convLabel = item.status === 'converting' ? '<span class="spinner"></span> Converting…' : ((!loaded && !skipsEngine) ? 'Preparing engine…' : 'Convert');
   div.innerHTML = `
     ${thumbHtml}
-    <div class="fileMeta"><b>${escapeHtml(item.file.name)}</b><div class="meta"><span>${sizeMB} MB</span><span class="status-pill ${statusClass}">${item.status}</span>${!item.isAudio ? '<span style="font-size:11px;color:var(--primary)">Click preview to play</span>' : ''}</div></div>
+    <div class="fileMeta"><b>${escapeHtml(item.file.name)}</b><div class="meta"><span>${sizeHtml}</span><span class="status-pill ${statusClass}">${item.status}</span>${!item.isAudio ? '<span style="font-size:11px;color:var(--primary)">Click preview to play</span>' : ''}</div></div>
     <div class="fileActions">
       <select data-id="${item.id}" class="vOut" style="min-width:140px">
           <optgroup label="🎬 Video">
@@ -1114,7 +1123,7 @@ function renderV() {
     </div>`;
   vList.appendChild(div);
   if (downloadVisible) { const a = document.getElementById(`vdl-${item.id}`); if (a) { a.href = item.downloadUrl; a.download = item.downloadName || `converted.${item.out}`; } }
-  document.querySelector('.vOut').onchange = e => { item.out = e.target.value; item.status = 'ready'; renderV(); };
+  document.querySelector('.vOut').onchange = e => { item.out = e.target.value; item.status = 'ready'; item.outSize = 0; renderV(); };
   document.querySelector('.vConv').onclick = e => {
     const it = vFiles.find(f => f.id === e.currentTarget.dataset.id);
     if (loaded || it?.out === 'wav') convertV(e.currentTarget.dataset.id);
@@ -1227,6 +1236,7 @@ async function convertV(id) {
       vProgressBar.style.width = '100%';
       item.downloadUrl = URL.createObjectURL(blob);
       item.status = 'done';
+      item.outSize = blob.size;
       item.downloadName = `converted-${Date.now()}.wav`;
       renderV();
       vStatus.textContent = '✅ Done instantly via native browser decode!';
@@ -1308,6 +1318,7 @@ async function convertV(id) {
       const blob = await recordingDone;
       item.downloadUrl = URL.createObjectURL(blob);
       item.status = 'done';
+      item.outSize = blob.size;
       item.downloadName = `converted-${Date.now()}.webm`;
       renderV();
       vStatus.textContent = '✅ Done via hardware (GPU) - 3-5x faster than WASM!';
@@ -1435,7 +1446,7 @@ async function convertV(id) {
       vStatus.textContent = 'Done via fast remux (instant)!';
     }
     item.downloadUrl = URL.createObjectURL(new Blob([data.buffer], { type: MIME[item.out] || 'application/octet-stream' }));
-    item.status = 'done'; item.downloadName = outName; renderV(); vStatus.textContent = 'Done — click Download'; vProgressBar.style.width = '100%';
+    item.status = 'done'; item.outSize = data ? data.length : 0; item.downloadName = outName; renderV(); vStatus.textContent = 'Done — click Download'; vProgressBar.style.width = '100%';
     setTimeout(() => { vProgressWrap.classList.remove('show'); vProgressBar.style.width = '0%'; }, 600);
   } catch (e) {
     console.error(e); item.status = 'error'; vStatus.textContent = 'Conversion failed: ' + (e.message || 'please try another format or smaller file'); vProgressWrap.classList.remove('show'); renderV();
