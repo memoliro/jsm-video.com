@@ -264,6 +264,7 @@ a:hover { color: var(--primary-hover); }
 .conv-chip.active { border-color: var(--primary); color: var(--primary); }
 .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px; }
 @media (max-width: 720px) { .faq-grid { grid-template-columns: 1fr; } }
+.batchBar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; font-size: 0.875rem; }
 
 .drop {
   border: 2px dashed var(--primary-border); background: var(--primary-soft);
@@ -628,9 +629,9 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
           <div id="vDrop" class="drop" tabindex="0" role="button" aria-label="Drop video or audio files">
             <div class="plus">+</div>
-            <div class="drop-title">Drop one video or audio file, or click to browse</div>
+            <div class="drop-title">Drop video or audio files, or click to browse</div>
             <div class="drop-hint">MP4 · MOV · MKV · WebM · MP3 · WAV · and more</div>
-            <input id="vInput" type="file" accept="video/*,audio/*" hidden>
+            <input id="vInput" type="file" accept="video/*,audio/*" multiple hidden>
           </div>
 
           <div id="vPreviewArea" class="vPreviewArea">
@@ -822,6 +823,8 @@ let loadingPromise = null;
 let ffmpegBlobURLs = [];
 let ffmpegMultiThreaded = false;
 const vFiles = [];
+let batchConverting = false;
+const MAX_BATCH_FILES = 10;
 const vDrop = document.getElementById('vDrop');
 const vInput = document.getElementById('vInput');
 const vList = document.getElementById('vList');
@@ -1007,12 +1010,58 @@ async function loadFFmpeg(forceFresh = false) {
 
 if (engineRetry) engineRetry.onclick = () => { loadingPromise = null; loadFFmpeg(true).catch(() => {}); };
 
-function clearCurrentVFile() {
-  const item = vFiles[0];
-  if (!item) return;
+function removeVFile(id) {
+  const i = vFiles.findIndex(f => f.id === id);
+  if (i < 0 || vFiles[i].status === 'converting' || batchConverting) return;
+  const [item] = vFiles.splice(i, 1);
   if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
   if (item.downloadUrl) URL.revokeObjectURL(item.downloadUrl);
-  vFiles.length = 0;
+  renderV();
+}
+
+async function convertAllV() {
+  if (batchConverting) return;
+  const queue = vFiles.filter(f => f.status === 'ready');
+  if (!queue.length) return;
+  batchConverting = true; renderV();
+  try {
+    for (let i = 0; i < queue.length; i++) {
+      const it = vFiles.find(f => f.id === queue[i].id);
+      if (!it || it.status !== 'ready') continue;
+      vStatus.textContent = `Batch ${i + 1} of ${queue.length}: converting ${it.file.name}…`;
+      await convertV(it.id);
+    }
+    const done = vFiles.filter(f => f.status === 'done').length;
+    vStatus.textContent = `Batch complete: ${done} file${done === 1 ? '' : 's'} converted.`;
+  } finally { batchConverting = false; renderV(); }
+}
+
+function addVFiles(list) {
+  const files = Array.from(list || []).filter(f => f && (f.type.startsWith('video/') || f.type.startsWith('audio/')));
+  if (!files.length) { vStatus.textContent = 'Please choose a supported video or audio file.'; return; }
+  let added = 0, skipped = 0;
+  for (const f of files) {
+    if (vFiles.length >= MAX_BATCH_FILES || f.size > MAX_HARD_BYTES) { skipped++; continue; }
+    const isAudio = f.type.startsWith('audio/');
+    let out = isAudio ? 'mp3' : 'mp4';
+    if (pendingOut) {
+      const audioOuts = ['mp3','wav','aac','ogg','flac','m4a','wma','opus','aiff','alac'];
+      if (!isAudio || audioOuts.includes(pendingOut)) out = pendingOut; // audio in -> audio out only
+    }
+    vFiles.push({
+      id: (crypto.randomUUID?.() || Math.random().toString(36).slice(2)), file: f,
+      out, status: 'ready', previewUrl: URL.createObjectURL(f), isAudio, outSize: 0
+    });
+    added++;
+  }
+  vInput.value = '';
+  const msgs = [];
+  if (added) msgs.push(`${added} file${added === 1 ? '' : 's'} added`);
+  if (skipped) msgs.push(`${skipped} skipped (limit ${MAX_BATCH_FILES} files, 1 GB each)`);
+  const large = vFiles.some(f => f.file.size > MAX_RECOMMENDED_BYTES);
+  vStatus.textContent = msgs.join('. ') + (large ? '. Large file warning: this may use significant memory and take longer on this device.' : '');
+  loadFFmpeg().catch(() => {});
+  renderV();
 }
 
 let pendingOut = ''; // set by Popular conversions chips; applied to the next added file
@@ -1027,34 +1076,7 @@ document.querySelectorAll('.conv-chip').forEach(chip => {
   });
 });
 
-function addVFiles(list) {
-  const f = list?.[0];
-  if (!f) return;
-  if (!f.type.startsWith('video/') && !f.type.startsWith('audio/')) {
-    vStatus.textContent = 'Please choose a supported video or audio file.';
-    return;
-  }
-  if (f.size > MAX_HARD_BYTES) {
-    vStatus.textContent = 'This file is over 1 GB. Please use a smaller file for browser-based conversion.';
-    return;
-  }
-  clearCurrentVFile();
-  const isAudio = f.type.startsWith('audio/');
-  let out = isAudio ? 'mp3' : 'mp4';
-  if (pendingOut) {
-    const audioOuts = ['mp3','wav','aac','ogg','flac','m4a','wma','opus','aiff','alac'];
-    if (!isAudio || audioOuts.includes(pendingOut)) out = pendingOut; // audio in -> audio out only
-  }
-  vFiles.push({
-    id: (crypto.randomUUID?.() || Math.random().toString(36).slice(2)), file: f,
-    out, status: 'ready', previewUrl: URL.createObjectURL(f), isAudio
-  });
-  vStatus.textContent = f.size > MAX_RECOMMENDED_BYTES
-    ? 'Large file warning: this may use significant memory and take longer on this device.'
-    : '';
-  loadFFmpeg().catch(() => {});
-  renderV();
-}
+/* (old single-file addVFiles removed — multi-file version is defined above) */
 
 function fmtSize(bytes){
   if(!Number.isFinite(bytes) || bytes < 0) return '—';
@@ -1066,10 +1088,29 @@ function fmtSize(bytes){
 
 function renderV() {
   vList.innerHTML = '';
-  const item = vFiles[0];
-  if (!item) { vDrop.classList.remove('hidden'); vPreviewArea.classList.remove('show'); return; }
+  if (!vFiles.length) { vDrop.classList.remove('hidden'); vPreviewArea.classList.remove('show'); return; }
   vDrop.classList.add('hidden');
   vPreviewArea.classList.add('show');
+  // batch toolbar
+  const busy = vFiles.some(f => f.status === 'converting');
+  const readyCount = vFiles.filter(f => f.status === 'ready').length;
+  const bar = document.createElement('div');
+  bar.className = 'batchBar';
+  bar.innerHTML = `
+    <span><b>${vFiles.length}</b> file${vFiles.length === 1 ? '' : 's'}</span>
+    <span style="flex:1"></span>
+    <button type="button" class="btn btn-ghost" id="vAddMore">＋ Add files</button>
+    ${vFiles.length > 1 ? `<button type="button" class="btn btn-blue" id="vConvertAll" ${(!readyCount || busy || batchConverting) ? 'disabled' : ''}>Convert all (${readyCount})</button>` : ''}
+    <button type="button" class="btn btn-ghost" id="vClearAll" ${busy || batchConverting ? 'disabled' : ''}>Clear</button>`;
+  vList.appendChild(bar);
+  document.getElementById('vAddMore').onclick = () => { vInput.value = ''; vInput.click(); };
+  document.getElementById('vClearAll').onclick = () => {
+    for (const it of vFiles) { if (it.previewUrl) URL.revokeObjectURL(it.previewUrl); if (it.downloadUrl) URL.revokeObjectURL(it.downloadUrl); }
+    vFiles.length = 0; renderV();
+  };
+  const callBtn = document.getElementById('vConvertAll');
+  if (callBtn) callBtn.onclick = convertAllV;
+  for (const item of vFiles) {
   const div = document.createElement('div');
   div.className = 'fileCard';
   const statusClass = `status-${item.status}`;
@@ -1119,18 +1160,19 @@ function renderV() {
         </select>
       <button data-id="${item.id}" class="vConv btn btn-blue" ${canConvert ? '' : 'disabled'}>${convLabel}</button>
       <a id="vdl-${item.id}" class="btn btn-green" style="display:${downloadVisible ? 'inline-flex' : 'none'}" download>⬇️ Download</a>
-      <button data-id="${item.id}" class="vReplace btn btn-ghost" aria-label="Choose another file" ${item.status === 'converting' ? 'disabled' : ''}>Replace</button>
+      <button data-id="${item.id}" class="vRemove btn btn-ghost" aria-label="Remove file" ${item.status === 'converting' ? 'disabled' : ''}>✕ Remove</button>
     </div>`;
   vList.appendChild(div);
   if (downloadVisible) { const a = document.getElementById(`vdl-${item.id}`); if (a) { a.href = item.downloadUrl; a.download = item.downloadName || `converted.${item.out}`; } }
-  document.querySelector('.vOut').onchange = e => { item.out = e.target.value; item.status = 'ready'; item.outSize = 0; renderV(); };
-  document.querySelector('.vConv').onclick = e => {
+  div.querySelector('.vOut').onchange = e => { item.out = e.target.value; item.status = 'ready'; item.outSize = 0; renderV(); };
+  div.querySelector('.vConv').onclick = e => {
     const it = vFiles.find(f => f.id === e.currentTarget.dataset.id);
     if (loaded || it?.out === 'wav') convertV(e.currentTarget.dataset.id);
   };
-  document.querySelector('.vReplace').onclick = () => { vInput.value = ''; vInput.click(); };
-  const preview = document.querySelector('.fileThumb[data-preview]');
+  div.querySelector('.vRemove').onclick = e => removeVFile(e.currentTarget.dataset.id);
+  const preview = div.querySelector('.fileThumb[data-preview]');
   if (preview) preview.onclick = () => { playerVideo.src = preview.dataset.preview; playerName.textContent = preview.dataset.name || 'Preview'; playerModal.classList.add('show'); playerVideo.play().catch(() => {}); };
+  } // end for (const item of vFiles)
   setTimeout(updateVPreviewTransform, 50);
 }
 
