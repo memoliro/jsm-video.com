@@ -7,39 +7,51 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://jsm-video.com/how-to-compress-video.html</loc>
+    <loc>https://jsm-video.com/articles/how-to-compress-video.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jsm-video.com/how-to-convert-mp4-to-mp3.html</loc>
+    <loc>https://jsm-video.com/articles/how-to-convert-mp4-to-mp3.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jsm-video.com/how-to-remove-audio.html</loc>
+    <loc>https://jsm-video.com/articles/how-to-remove-audio.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://jsm-video.com/mp4-vs-mov-vs-gif.html</loc>
+    <loc>https://jsm-video.com/articles/mp4-vs-mov-vs-gif.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://jsm-video.com/faster-smaller-files.html</loc>
+    <loc>https://jsm-video.com/articles/faster-smaller-files.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://jsm-video.com/why-private-conversion.html</loc>
+    <loc>https://jsm-video.com/articles/why-private-conversion.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jsm-video.com/articles/mov-to-mp4.html</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jsm-video.com/articles/video-to-gif.html</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>

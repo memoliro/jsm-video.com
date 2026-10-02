@@ -617,13 +617,11 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             <span class="pill">Files stay on device</span>
           </div>
 
-          <!--
           <div id="engineBanner" class="engineBanner loading" role="status" aria-live="polite">
             <span id="engineTitle">Preparing conversion engine…</span>
             <span id="engineDesc" style="color:var(--muted)">Loading local engine (first use may take a moment)</span>
             <button id="engineRetry" class="btn btn-ghost" style="display:none;font-size:12px;padding:6px 12px">Retry</button>
           </div>
-          -->
 
           <div class="progress-wrap" id="vProgressWrap" style="margin-top:-8px;margin-bottom:16px"><div class="progress-bar" id="vProgressBar" style="width:0%"></div></div>
 
@@ -740,6 +738,18 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
               <h3>How to convert MP4 to MP3 without uploading</h3>
               <p>Extract audio from video privately for podcasts, ringtones, or music. Learn which bitrate to choose and how to do it 100% locally with ffmpeg.wasm - no server hears your audio.</p>
               <a href="/articles/how-to-convert-mp4-to-mp3.html">Read more →</a>
+            </article>
+            <article class="article-card">
+              <span class="tag">Video</span>
+              <h3>How to convert MOV to MP4</h3>
+              <p>iPhone videos save as MOV but play everywhere as MP4. Convert free and privately — usually instant, with zero quality loss.</p>
+              <a href="/articles/mov-to-mp4.html">Read more →</a>
+            </article>
+            <article class="article-card">
+              <span class="tag">Video</span>
+              <h3>How to make a GIF from a video</h3>
+              <p>Turn any MP4 or MOV clip into a shareable animated GIF for Discord, Slack, and social — free, private, no watermark.</p>
+              <a href="/articles/video-to-gif.html">Read more →</a>
             </article>
             <article class="article-card">
               <span class="tag">Tips</span>
@@ -921,6 +931,8 @@ async function tryLoadCoreFromBase(base, useMultiThread, classWorkerURL) {
   );
   const loadOpts = { coreURL, wasmURL, classWorkerURL };
   if (useMultiThread) loadOpts.workerURL = workerURL;
+  setEngineUI('loading', 'Starting conversion engine…', 'Download complete — initializing.');
+  vProgressBar.style.width = '70%';
   await withTimeout(
     ffmpeg.load(loadOpts),
     40000,
@@ -943,8 +955,11 @@ async function loadCoreFrom() {
     `${location.origin}/ffmpeg`
   ];
   let lastErr = null;
-  for (const base of bases) {
+  for (let bi = 0; bi < bases.length; bi++) {
+    const base = bases[bi];
     try {
+      setEngineUI('loading', 'Downloading conversion engine…', `Source ${bi + 1} of ${bases.length} — first visit downloads ~25 MB, then it's cached.`);
+      vProgressBar.style.width = '35%';
       await resetFFmpeg();
       ffmpeg = new FFmpeg();
       ffmpeg.on('progress', ({ progress }) => {
@@ -978,8 +993,8 @@ async function loadFFmpeg(forceFresh = false) {
   if (forceFresh) await resetFFmpeg();
 
   loadingPromise = (async () => {
-    setEngineUI('loading', 'Preparing conversion engine…', 'Loading the local conversion engine. This may take a moment on the first use.');
-    vProgressBar.style.width = '35%';
+    setEngineUI('loading', 'Preparing conversion engine…', 'Checking local files…');
+    vProgressWrap.classList.add('show'); vProgressBar.style.width = '10%';
     try {
       await resetFFmpeg();
       ffmpeg = new FFmpeg();
@@ -996,6 +1011,8 @@ async function loadFFmpeg(forceFresh = false) {
         ? 'Multi-threaded acceleration active — conversions will use multiple CPU cores.'
         : 'You can convert your file now. Large files may take several minutes depending on your device.');
       vStatus.textContent = '';
+      vProgressBar.style.width = '100%';
+      setTimeout(() => { vProgressWrap.classList.remove('show'); vProgressBar.style.width = '0%'; }, 900);
     } catch (err) {
       const detail = (err && err.message) ? err.message : String(err);
       console.error('FFmpeg load error:', err);
