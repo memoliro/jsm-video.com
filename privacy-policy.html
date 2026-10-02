@@ -421,6 +421,8 @@ footer {
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .footer-links a { color: var(--muted); font-weight: 500; }
 .footer-links a:hover { color: var(--text); }
+.footer-more { align-items: center; font-size: 0.8125rem; }
+.footer-more span { color: var(--muted); font-weight: 600; }
 
 .section-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .mt-5 { margin-top: 20px; }
@@ -435,7 +437,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
 .navLinks a {
-  font-size: 0.8125rem; font-weight: 600; color: var(--muted);
+  font-size: 0.8125rem; font-weight: 700; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; text-decoration: none; white-space: nowrap;
+  transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
 @media (max-width: 720px) {
@@ -486,7 +491,28 @@ body{max-width:800px;margin:0 auto;padding:20px;line-height:1.7}
 <h2>4. Google AdSense</h2><p>Third-party vendors, including Google, use cookies to serve ads. You can opt out of personalized advertising at <a href="https://www.google.com/settings/ads">adssettings.google.com</a>. See our <a href="/ads.txt">ads.txt</a>.</p>
 <h2>5. Your Rights</h2><p>You can delete consent choice anytime by clearing localStorage key <code>consent_choice</code> in your browser, or by using the Reject button. For Quebec/Canada privacy requests, contact support@JSM-Video.com.</p>
 <h2>6. Contact</h2><p>Email: support@JSM-Video.com — Montreal, QC, Canada</p>
-<footer><p><a href="/">Home</a> · <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy-policy.html">Privacy</a> · <a href="/terms.html">Terms</a></p><p>© 2026 JSM-Video.com — All tools run locally in your browser. No uploads.</p></footer>
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
+      <div class="footer-links">
+        <a href="/">Converter</a>
+        <a href="/#articles">Articles</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+      <div class="footer-links footer-more">
+        <span>More free tools:</span>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
+      </div>
+    </div>
+  </div>
+</footer>
 <script>(function(){var btn=document.getElementById('themeToggle');if(!btn)return;function apply(t){document.documentElement.setAttribute('data-theme',t);localStorage.setItem('theme',t);btn.textContent=t==='dark'?'☀️':'🌙';}var cur=document.documentElement.getAttribute('data-theme')||'light';btn.textContent=cur==='dark'?'☀️':'🌙';btn.onclick=function(){var c=document.documentElement.getAttribute('data-theme');apply(c==='dark'?'light':'dark');};})();</script>
 <script>(function(){if(localStorage.getItem('consent_choice'))return;var b=document.createElement('div');b.style.cssText='position:fixed;bottom:16px;left:16px;right:16px;max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:9999;display:flex;gap:12px;align-items:center;flex-wrap:wrap';b.innerHTML='<div style="flex:1;min-width:220px">We use cookies for analytics and ads if you accept. <a href="/privacy-policy.html">Learn more</a></div><div style="display:flex;gap:8px"><button id="reject" style="padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer">Reject</button><button id="accept" style="padding:8px 14px;border-radius:8px;border:0;background:var(--primary);color:white;cursor:pointer">Accept</button></div>';document.body.appendChild(b);function update(g){var c=g?'granted':'denied';gtag('consent','update',{ad_storage:c,ad_user_data:c,ad_personalization:c,analytics_storage:c});localStorage.setItem('consent_choice',g?'accepted':'rejected');b.remove();if(g){try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}}}b.querySelector('#accept').onclick=function(){update(true);};b.querySelector('#reject').onclick=function(){update(false);};})();</script>
 

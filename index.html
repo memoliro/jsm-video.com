@@ -4,7 +4,7 @@
 <meta name="google-adsense-account" content="ca-pub-4747106371991816">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Convert, Rotate & Flip, Mute Video - Private and Free Online. No uploads, no tracking. Free MP4, MOV, MP3, WAV, AAC, FLAC converter.">
+<meta name="description" content="Free online video converter: convert MP4, MOV, MKV, WebM, AVI to MP3, WAV, AAC and more. Rotate, flip, mute — 100% private, no uploads, no watermark.">
 <meta name="theme-color" content="#0b1120">
 
 <!--
@@ -19,10 +19,10 @@
 <meta property="og:image" content="https://JSM-Video.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<title>Convert, Rotate & Flip, Mute Video - Private and Free Online | JSM-Video.com</title>
+<title>Free Online Video Converter — MP4, MOV, WebM to MP3 & More | 100% Private | JSM-Video.com</title>
 
 <link rel="canonical" href="https://JSM-Video.com/">
-<meta property="og:title" content="Free Private Video & Audio Converter — No Upload Needed">
+<meta property="og:title" content="Free Online Video Converter — MP4, MOV, WebM to MP3 & More | 100% Private">
 <meta property="og:description" content="Convert video and audio privately in your browser. No uploads, no tracking. MP4, MOV, MP3, WAV, WebP converter with resize, rotate, flip and compress.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://JSM-Video.com/">
@@ -253,6 +253,17 @@ a:hover { color: var(--primary-hover); }
   background: var(--bg); border: 1px solid var(--border);
   padding: 6px 12px; border-radius: 999px;
 }
+.conv-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.conv-chip {
+  font-size: 0.8125rem; font-weight: 700; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; cursor: pointer; font-family: inherit;
+  transition: all 0.15s ease; box-shadow: var(--shadow-sm);
+}
+.conv-chip:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+.conv-chip.active { border-color: var(--primary); color: var(--primary); }
+.faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 28px; }
+@media (max-width: 720px) { .faq-grid { grid-template-columns: 1fr; } }
 
 .drop {
   border: 2px dashed var(--primary-border); background: var(--primary-soft);
@@ -487,6 +498,8 @@ footer {
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .footer-links a { color: var(--muted); font-weight: 500; }
 .footer-links a:hover { color: var(--text); }
+.footer-more { align-items: center; font-size: 0.8125rem; }
+.footer-more span { color: var(--muted); font-weight: 600; }
 
 .section-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .mt-5 { margin-top: 20px; }
@@ -501,7 +514,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
 .navLinks a {
-  font-size: 0.8125rem; font-weight: 600; color: var(--muted);
+  font-size: 0.8125rem; font-weight: 700; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; text-decoration: none; white-space: nowrap;
+  transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
 @media (max-width: 720px) {
@@ -551,8 +567,8 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
       <!-- VIDEO TAB -->
       <div id="videoTab" style="display:block">
         <div class="card">
-          <h1 class="hero-title">Video & Audio Converter</h1>
-          <p class="hero-sub">Convert formats entirely in your browser. Nothing leaves your device.</p>
+          <h1 class="hero-title">Free Online Video Converter</h1>
+          <p class="hero-sub">Convert MP4, MOV, WebM & more — entirely in your browser. Nothing leaves your device.</p>
           
           <!--
           <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:12px 0 8px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:12px;font-size:12px">
@@ -652,10 +668,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
       </div>
 
       
+      <!-- POPULAR CONVERSIONS -->
+      <section class="card mt-5" id="popular">
+        <h2 class="section-title">Popular conversions</h2>
+        <p style="color:var(--muted);font-size:.875rem;margin:6px 0 14px">Pick a conversion — the output format is pre-selected, then drop your file.</p>
+        <div class="conv-chips">
+          <button type="button" class="conv-chip" data-out="mp3">MP4 → MP3</button>
+          <button type="button" class="conv-chip" data-out="mp4">MOV → MP4</button>
+          <button type="button" class="conv-chip" data-out="mp4">WebM → MP4</button>
+          <button type="button" class="conv-chip" data-out="mp4">MKV → MP4</button>
+          <button type="button" class="conv-chip" data-out="mp4">AVI → MP4</button>
+          <button type="button" class="conv-chip" data-out="mp3">WAV → MP3</button>
+          <button type="button" class="conv-chip" data-out="mp3">M4A → MP3</button>
+          <button type="button" class="conv-chip" data-out="wav">MP4 → WAV</button>
+          <button type="button" class="conv-chip" data-out="aac">MP3 → AAC</button>
+          <button type="button" class="conv-chip" data-out="gif">MP4 → GIF</button>
+        </div>
+      </section>
+
       <!-- FAQ for SEO rich results -->
       <section class="card mt-5" id="faq">
         <h2 class="section-title">Frequently Asked Questions</h2>
-        <div style="display:flex;flex-direction:column;gap:18px;margin-top:16px">
+        <div class="faq-grid" style="margin-top:16px">
           <div><strong>Are my files uploaded?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">No. 100% local processing with ffmpeg.wasm. No upload endpoint exists. Your video never leaves your device. Perfect for private files.</p></div>
           <div><strong>Is it free? Any watermark?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Free forever, no watermark, no account. We are supported by ads. Advertising and analytics remain disabled until you click Accept.</p></div>
           <div><strong>What is the max file size?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Best under 500 MB. Hard limit 1 GB for browser stability. For larger files, use Handbrake or Shutter Encoder desktop tools.</p></div>
@@ -719,14 +753,22 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <footer>
   <div class="wrap">
     <div class="footer-inner">
-      <div>© 2026 JSM-Video.com · Private by design — Video & Audio only</div>
+      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
       <div class="footer-links">
-        <a href="/privacy-policy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
+        <a href="/">Converter</a>
+        <a href="/#articles">Articles</a>
         <a href="/about.html">About</a>
         <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
         <a href="#" id="cookieSettingsBtn">Cookie Settings</a>
-        <a href="#articles">Articles</a>
+      </div>
+      <div class="footer-links footer-more">
+        <span>More free tools:</span>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
       </div>
     </div>
   </div>
@@ -967,6 +1009,18 @@ function clearCurrentVFile() {
   vFiles.length = 0;
 }
 
+let pendingOut = ''; // set by Popular conversions chips; applied to the next added file
+document.querySelectorAll('.conv-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.conv-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    pendingOut = chip.dataset.out || '';
+    if (typeof vStatus !== 'undefined' && vStatus) vStatus.textContent = `Output pre-selected: ${pendingOut.toUpperCase()} — drop your file to convert.`;
+    const tab = document.getElementById('videoTab');
+    if (tab) tab.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
 function addVFiles(list) {
   const f = list?.[0];
   if (!f) return;
@@ -980,9 +1034,14 @@ function addVFiles(list) {
   }
   clearCurrentVFile();
   const isAudio = f.type.startsWith('audio/');
+  let out = isAudio ? 'mp3' : 'mp4';
+  if (pendingOut) {
+    const audioOuts = ['mp3','wav','aac','ogg','flac','m4a','wma','opus','aiff','alac'];
+    if (!isAudio || audioOuts.includes(pendingOut)) out = pendingOut; // audio in -> audio out only
+  }
   vFiles.push({
     id: (crypto.randomUUID?.() || Math.random().toString(36).slice(2)), file: f,
-    out: isAudio ? 'mp3' : 'mp4', status: 'ready', previewUrl: URL.createObjectURL(f), isAudio
+    out, status: 'ready', previewUrl: URL.createObjectURL(f), isAudio
   });
   vStatus.textContent = f.size > MAX_RECOMMENDED_BYTES
     ? 'Large file warning: this may use significant memory and take longer on this device.'

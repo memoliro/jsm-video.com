@@ -13,7 +13,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact Us — JSM-Video.com</title>
-<meta name="description" content="Contact JSM-Video.com support">
+<meta name="description" content="Contact JSM-Video.com — bug reports, feature requests, and questions about the free private online video converter.">
 <link rel="canonical" href="https://JSM-Video.com/contact.html">
 <meta name="theme-color" content="#0b1120">
 
@@ -447,6 +447,8 @@ footer {
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .footer-links a { color: var(--muted); font-weight: 500; }
 .footer-links a:hover { color: var(--text); }
+.footer-more { align-items: center; font-size: 0.8125rem; }
+.footer-more span { color: var(--muted); font-weight: 600; }
 
 .section-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .mt-5 { margin-top: 20px; }
@@ -461,7 +463,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
 .navLinks a {
-  font-size: 0.8125rem; font-weight: 600; color: var(--muted);
+  font-size: 0.8125rem; font-weight: 700; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; text-decoration: none; white-space: nowrap;
+  transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
 @media (max-width: 720px) {
@@ -506,12 +511,101 @@ body{max-width:800px;margin:0 auto;padding:20px;line-height:1.7}
 </header>
 
 <h1>Contact Us</h1>
-<div class="card"><p>Have a question, bug report, or feature request? We read every message.</p><p><strong>Email:</strong> support@JSM-Video.com<br><strong>GitHub Issues:</strong> <a href="https://github.com/memoliro/JSM-Video.com/issues">github.com/memoliro/JSM-Video.com/issues</a><br><strong>Location:</strong> Montreal, QC, Canada</p></div>
-<h2>What to include</h2><p>For bug reports, please include browser, file type, and steps to reproduce.</p>
+<div class="card"><p>Have a question, bug report, or feature request? Send a message below — we read every one. For public issues you can also use <a href="https://github.com/memoliro/JSM-Video.com/issues">GitHub Issues</a>.</p></div>
+<form id="contactForm" class="contact-form" method="POST" action="#">
+  <label for="topic">Topic</label>
+  <select id="topic" name="topic">
+    <option value="">Select a topic (optional)</option>
+    <option value="Site or tool question">Site or tool question</option>
+    <option value="Bug report">Bug report</option>
+    <option value="Feature request">Feature request</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <label for="message">Message</label>
+  <textarea id="message" name="message" rows="7" required minlength="10" maxlength="5000" placeholder="Write your message here… For bugs, mention your browser, the file type, and what you were converting."></textarea>
+  <div class="char-meta"><span id="charCount">0</span> / 5000 · Minimum 10 characters</div>
+
+  <input type="text" name="_gotcha" id="gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="hp-field">
+  <input type="hidden" name="_subject" value="JSM-Video contact form">
+  <input type="hidden" name="_template" value="table">
+  <input type="hidden" name="_captcha" value="false">
+
+  <button type="submit" class="btn btn-blue contact-send" id="contactSubmit">Send Message</button>
+  <p id="contactStatus" class="contact-status" role="status" aria-live="polite"></p>
+  <p class="contact-fineprint">No personal information is asked or stored. Your message is anonymous. Please don't include passwords or sensitive data. If you want a reply, you can optionally include a contact method inside your message. See <a href="/privacy-policy.html">Privacy</a>.</p>
+</form>
+<h2>What to include</h2>
+<ul>
+<li>Your browser and OS version</li>
+<li>File type and size you tried to convert</li>
+<li>Steps to reproduce the issue</li>
+</ul>
+<h2>Location</h2>
+<p>JSM-Video.com is operated from Montreal, Quebec, Canada and is available worldwide.</p>
+<style>
+.contact-form{margin:18px 0 8px;display:flex;flex-direction:column;gap:8px;max-width:640px}
+.contact-form label{font-size:14px;font-weight:700;margin-top:6px}
+.contact-form select,.contact-form textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;box-sizing:border-box}
+.contact-form textarea{min-height:150px;resize:vertical;line-height:1.5}
+.contact-form .hp-field{position:absolute;left:-9999px;height:0;width:0;opacity:0}
+.contact-send{align-self:flex-start;margin-top:8px}
+.contact-status{min-height:1.2em;font-size:13px;color:var(--muted);margin:6px 0 0}
+.contact-fineprint{font-size:12px;color:var(--muted)}
+.char-meta{font-size:12px;color:var(--muted);margin-top:2px}
+</style>
+<script>
+(function(){
+  var parts=['contact','@','jsm-video','.com'];
+  var endpoint='https://formsubmit.co/ajax/'+parts.join('');
+  var form=document.getElementById('contactForm');
+  if(!form)return;
+  var status=document.getElementById('contactStatus');
+  var btn=document.getElementById('contactSubmit');
+  var ta=document.getElementById('message');
+  var count=document.getElementById('charCount');
+  function updateCount(){if(count&&ta)count.textContent=String(ta.value.length);}
+  if(ta)ta.addEventListener('input',updateCount);
+  updateCount();
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var honey=document.getElementById('gotcha');
+    if(honey&&honey.value)return;
+    var msg=((document.getElementById('message')||{}).value||'');
+    if(msg.trim().length<10){if(status)status.textContent='Please write at least 10 characters.';return;}
+    if(btn){btn.disabled=true;btn.textContent='Sending…';}
+    if(status)status.textContent='';
+    var data=new FormData(form);
+    fetch(endpoint,{method:'POST',body:data,headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json().catch(function(){return {};});})
+      .then(function(){form.reset();updateCount();if(status)status.textContent='Message sent. Thank you.';})
+      .catch(function(){if(status)status.textContent='Could not send right now. Try again later.';})
+      .finally(function(){if(btn){btn.disabled=false;btn.textContent='Send Message';}});
+  });
+})();
+</script>
 
 <footer>
-  <p><a href="/">Home</a> · <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy-policy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
-  <p>© 2026 JSM-Video.com — All tools run locally in your browser. No uploads.</p>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
+      <div class="footer-links">
+        <a href="/">Converter</a>
+        <a href="/#articles">Articles</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+      <div class="footer-links footer-more">
+        <span>More free tools:</span>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
+      </div>
+    </div>
+  </div>
 </footer>
 <script>
 (function(){

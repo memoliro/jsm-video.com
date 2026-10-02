@@ -12,7 +12,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About Us — JSM-Video.com</title>
+<title>About — Free Private Online Video Converter | JSM-Video.com</title>
 <meta name="description" content="About JSM-Video.com - privacy-first video, audio and image converters that run locally in your browser.">
 
 <link rel="canonical" href="https://JSM-Video.com/about.html">
@@ -447,6 +447,8 @@ footer {
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .footer-links a { color: var(--muted); font-weight: 500; }
 .footer-links a:hover { color: var(--text); }
+.footer-more { align-items: center; font-size: 0.8125rem; }
+.footer-more span { color: var(--muted); font-weight: 600; }
 
 .section-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .mt-5 { margin-top: 20px; }
@@ -461,7 +463,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
 .navLinks a {
-  font-size: 0.8125rem; font-weight: 600; color: var(--muted);
+  font-size: 0.8125rem; font-weight: 700; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; text-decoration: none; white-space: nowrap;
+  transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
 @media (max-width: 720px) {
@@ -506,15 +511,46 @@ body{max-width:800px;margin:0 auto;padding:20px;line-height:1.7}
 </header>
 
 <h1>About JSM-Video.com</h1>
-<div class="card"><p><strong>JSM-Video.com</strong> is a privacy-first collection of free browser-based converters for video, audio and images. Everything runs locally on your device using WebAssembly and HTML5 Canvas — your files never leave your computer.</p></div>
-<h2>What we do</h2>
-<p>We started because most online converters force you to upload private photos and videos to a server. That's risky, slow, and often costs money for large files. JSM-Video.com does the opposite: we compile tools like FFmpeg to WebAssembly (WASM) so MP4 to MP3, MOV to GIF, image resize, HEIC to JPG, WebP conversion and batch ZIP export all happen 100% offline in your browser tab.</p>
+<div class="card"><p><strong>JSM-Video.com</strong> is a free online video converter that runs 100% in your browser. Convert MP4, MOV, MKV, WebM, AVI and more to MP4, MP3, WAV, AAC, GIF and 20+ other formats — plus rotate, flip, and mute videos — with no uploads, no accounts, no watermarks, and no file-size games.</p></div>
+<h2>What you can do here</h2>
+<ul>
+<li><strong>Convert video formats:</strong> MP4, MOV, MKV, WebM, AVI, FLV, WMV, M4V, 3GP, MPG, MPEG, TS, MTS, MXF — converted to anything from universal MP4 to lightweight WebM.</li>
+<li><strong>Extract audio:</strong> turn any video into MP3, WAV, AAC, OGG, FLAC, M4A, WMA, OPUS, AIFF, or ALAC. Perfect for podcasts, ringtones, and music clips.</li>
+<li><strong>Rotate &amp; flip:</strong> fix portrait videos shot sideways — rotate 90°, 180°, 270°, or mirror horizontally/vertically.</li>
+<li><strong>Mute videos:</strong> strip the audio track for silent clips, GIFs, and presentations.</li>
+<li><strong>Make GIFs:</strong> convert short MP4 or MOV clips into shareable animated GIFs.</li>
+</ul>
+<h2>How the technology works</h2>
+<p>Most online converters upload your file to a server, convert it there, and send it back. That means waiting on uploads, trusting strangers with private footage, and hitting paywalls for large files. JSM-Video.com does the opposite: we compile <strong>FFmpeg</strong> — the same professional engine behind YouTube and VLC — to <strong>WebAssembly (WASM)</strong>, so it runs directly in your browser tab. Your video is decoded, converted, and re-encoded on your own device. There is no upload endpoint at all, so your files <em>cannot</em> leave your computer even in theory.</p>
+<p>The ~25&nbsp;MB engine downloads once and is cached by your browser, so repeat conversions start instantly. Conversion speed depends on your device and the file size — modern laptops handle typical phone videos in seconds to a couple of minutes.</p>
 <h2>Why local processing matters</h2>
-<ul><li><strong>Privacy:</strong> No server upload, no tracking of your media. EXIF GPS data is stripped automatically.</li><li><strong>Speed:</strong> No waiting for uploads/downloads.</li><li><strong>Free forever:</strong> No credits, no watermarks.</li></ul>
+<ul><li><strong>Privacy:</strong> No server upload, no media tracking, no third-party access. Sensitive footage — family videos, work recordings, unreleased content — never leaves your hands.</li><li><strong>Speed:</strong> No waiting for uploads and downloads; the only limit is your own CPU.</li><li><strong>Free forever:</strong> No credits, no watermarks, no "premium unlock" for basic formats. The site is supported by ads, shown only after you accept cookies.</li><li><strong>Works offline (after first load):</strong> once the engine is cached, you can convert on a plane, in a studio, or anywhere without a connection.</li></ul>
+<h2>Practical limits</h2>
+<p>Browser-based conversion works best under 500&nbsp;MB per file; the hard cap is 1&nbsp;GB to protect browser stability. Very long 4K footage converts more slowly — for feature-length projects, a desktop tool like HandBrake or Shutter Encoder is still the better choice. WAV extraction is instant because it needs no re-encoding.</p>
+<h2>Who runs this site</h2>
+<p>JSM-Video.com is an independent project by the maker of <a href="https://jsm-image.com/">JSM-Image.com</a> (free private image tools) and <a href="https://jsm-options.com/">JSM-Options.com</a> (options trading education). The philosophy is the same everywhere: free tools, honest labeling, and your data stays yours. Questions? Use the <a href="/contact.html">contact page</a>.</p>
 
 <footer>
-  <p><a href="/">Home</a> · <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy-policy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
-  <p>© 2026 JSM-Video.com — All tools run locally in your browser. No uploads.</p>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
+      <div class="footer-links">
+        <a href="/">Converter</a>
+        <a href="/#articles">Articles</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+      <div class="footer-links footer-more">
+        <span>More free tools:</span>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
+      </div>
+    </div>
+  </div>
 </footer>
 <script>
 (function(){

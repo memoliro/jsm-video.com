@@ -404,6 +404,8 @@ footer {
 .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
 .footer-links a { color: var(--muted); font-weight: 500; }
 .footer-links a:hover { color: var(--text); }
+.footer-more { align-items: center; font-size: 0.8125rem; }
+.footer-more span { color: var(--muted); font-weight: 600; }
 
 .section-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .mt-5 { margin-top: 20px; }
@@ -418,7 +420,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
 .navLinks a {
-  font-size: 0.8125rem; font-weight: 600; color: var(--muted);
+  font-size: 0.8125rem; font-weight: 700; color: var(--text);
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 14px; text-decoration: none; white-space: nowrap;
+  transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
 @media (max-width: 720px) {
@@ -526,7 +531,26 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
   </div>
 </main>
 <footer>
-  <div class="wrap"><div class="footer-inner"><div>© 2026 JSM-Video.com · Private by design</div><div class="footer-links"><a href="/privacy-policy.html">Privacy</a><a href="/terms.html">Terms</a><a href="/about.html">About</a><a href="/contact.html">Contact</a></div></div></div>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
+      <div class="footer-links">
+        <a href="/">Converter</a>
+        <a href="/#articles">Articles</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </div>
+      <div class="footer-links footer-more">
+        <span>More free tools:</span>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
+      </div>
+    </div>
+  </div>
 </footer>
 <script>
 const themeBtn=document.getElementById('themeToggle');
