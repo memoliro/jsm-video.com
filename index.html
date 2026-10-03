@@ -64,7 +64,7 @@
   try{
     var saved = localStorage.getItem('theme');
     if(!saved){
-      saved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      saved = 'light';
     }
     document.documentElement.setAttribute('data-theme', saved);
   }catch(e){
@@ -231,6 +231,13 @@ a:hover { color: var(--primary-hover); }
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow);
 }
+/* --- Support the site --- */
+.support-section { text-align: center; }
+.support-section p { color: var(--muted); margin: 6px 0 18px; }
+.bmc-btn { display: inline-flex; align-items: center; gap: 8px; background: #FFDD00; color: #000 !important;
+  font-weight: 700; padding: 12px 24px; border-radius: 999px; text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease; }
+.bmc-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,.15); }
 .grid2 {
   display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start;
 }
@@ -766,6 +773,12 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
       </aside>
   </div>
 </div>
+
+      <section class="card mt-5 support-section">
+        <h2 class="section-title">Support the site</h2>
+        <p>JSM-Video.com stays free. If it helps, you can buy a coffee.</p>
+        <a class="bmc-btn" href="https://www.buymeacoffee.com/memoliro" target="_blank" rel="noopener">&#9749; Buy me a coffee</a>
+      </section>
 
 <footer>
   <div class="wrap">
