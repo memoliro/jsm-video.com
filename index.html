@@ -589,6 +589,18 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 .fChip { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: inherit; }
 .fChip:hover { border-color: var(--border-strong); }
 .fChip.active { outline: 2px solid #60a5fa; outline-offset: 1px; }
+/* Trim mode radio cards */
+.tModeCard { display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--border);padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px; }
+.tModeCard:has(input:checked) { border-color:var(--primary); outline:2px solid #60a5fa; outline-offset:1px; }
+.tModeCard input { margin-top:3px; accent-color:var(--primary); width:15px; height:15px; flex:0 0 auto; }
+.tModeCard b { display:block; margin-bottom:2px; }
+.tModeCard small { color:var(--muted); font-size:11.5px; line-height:1.45; display:block; }
+/* File chips with per-file remove */
+.fChip { display:inline-flex; align-items:center; gap:4px; padding:0; cursor:default; }
+.fChipLabel { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; padding:7px 0 7px 14px; }
+.fChipX { border:0; background:transparent; color:var(--muted); cursor:pointer; font-size:12px; padding:7px 10px 7px 6px; border-radius:0 999px 999px 0; font-family:inherit; line-height:1; }
+.fChipX:hover { color:#ef4444; }
+.fChipX:disabled { opacity:.35; cursor:default; }
 .batchRow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .tField { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; font-weight: 600; }
 .tField select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 13px; max-width: 172px; font-family: inherit; }
@@ -855,7 +867,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                 <div style="margin-bottom:12px">
                   <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
                 </div>
-                <div id="tFileMeta" style="font-size:13px;color:var(--muted);margin-bottom:6px;overflow-wrap:break-word"></div>
+                <div id="tFileMeta" class="vPrevMeta" style="margin-bottom:12px;border:1px solid var(--border);border-radius:12px"></div>
                 <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
 
                 <div id="tTimeline" class="tl" aria-label="Video timeline — drag the blue handles to set trim start and end">
@@ -894,11 +906,11 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                   </div>
                 </div>
 
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px" role="radiogroup" aria-label="Trim mode">
-                  <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="fast" checked> <span>⚡ Fast cut</span></label>
-                  <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="precise"> <span>🎯 Precise cut</span></label>
+                <div style="display:grid;gap:8px;margin-bottom:8px" role="radiogroup" aria-label="Trim mode">
+                  <label class="tModeCard"><input type="radio" name="tMode" value="fast" checked> <span><b>⚡ Fast cut</b><small>Instant — keeps the original format. Cut points snap to the nearest keyframe.</small></span></label>
+                  <label class="tModeCard"><input type="radio" name="tMode" value="precise"> <span><b>🎯 Precise cut</b><small>Frame-exact — re-encodes the video. Slower, always outputs MP4.</small></span></label>
                 </div>
-                <p style="font-size:12px;color:var(--muted);margin:0 0 14px">Select a part and press <b>Delete</b> — it's removed from the preview instantly (press play: removed parts are skipped). Repeat for more parts, then <b>Save</b>. Fast cut is instant but snaps to keyframes; Precise cut re-encodes frame-exact (slower, always MP4).</p>
+                <p style="font-size:12px;color:var(--muted);margin:0 0 14px">Select a part and press <b>Delete</b> — it's removed from the preview instantly (press play: removed parts are skipped). Repeat for more parts, then <b>Save</b>.</p>
 
                 <div style="display:grid;gap:8px">
                   <button id="tDeleteBtn" class="btn btn-blue">🗑️ Delete selection</button>
@@ -1461,13 +1473,24 @@ function renderVChips(item) {
   vFileChips.style.display = vFiles.length > 1 ? 'flex' : 'none';
   vFileChips.innerHTML = '';
   for (const f of vFiles) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'fChip' + (f.id === item.id ? ' active' : '');
-    b.textContent = (f.isAudio ? '🎵 ' : '🎬 ') + f.file.name;
-    b.title = f.file.name;
-    b.onclick = () => { vSelectedId = f.id; renderV(); };
-    vFileChips.appendChild(b);
+    const wrap = document.createElement('span');
+    wrap.className = 'fChip' + (f.id === item.id ? ' active' : '');
+    wrap.title = f.file.name;
+    const label = document.createElement('span');
+    label.className = 'fChipLabel';
+    label.textContent = (f.isAudio ? '🎵 ' : '🎬 ') + f.file.name;
+    label.onclick = () => { vSelectedId = f.id; renderV(); };
+    wrap.appendChild(label);
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'fChipX';
+    x.textContent = '✕';
+    x.title = 'Remove this file';
+    x.setAttribute('aria-label', 'Remove ' + f.file.name);
+    x.disabled = f.status === 'converting' || batchConverting;
+    x.onclick = e => { e.stopPropagation(); removeVFile(f.id); };
+    wrap.appendChild(x);
+    vFileChips.appendChild(wrap);
   }
   const busy = vFiles.some(f => f.status === 'converting') || batchConverting;
   vAddMoreBtn.onclick = () => { vInput.value = ''; vInput.click(); };
