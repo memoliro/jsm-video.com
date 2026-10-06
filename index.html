@@ -244,6 +244,7 @@ a:hover { color: var(--primary-hover); }
 .grid2 {
   display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start;
 }
+.grid2:has(> .sidebar:empty) { grid-template-columns: 1fr; }
 @media (max-width: 1024px) {
   .grid2 { grid-template-columns: 1fr; }
   .sidebar { display: flex; }
@@ -907,8 +908,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
       </section>
     </main>
 
-    <aside class="sidebar" style="display: flex; flex-direction: column; gap: 20px">
-      </aside>
+    <aside class="sidebar" style="display: flex; flex-direction: column; gap: 20px"></aside>
   </div>
 </div>
 
@@ -975,8 +975,17 @@ document.querySelectorAll('.tabBtn').forEach(b => {
     b.setAttribute('aria-selected', 'true');
     document.getElementById('videoTab').style.display = b.dataset.tab === 'video' ? 'block' : 'none';
     document.getElementById('trimTab').style.display = b.dataset.tab === 'trim' ? 'block' : 'none';
+    try { history.replaceState(null, '', b.dataset.tab === 'trim' ? '#trim' : location.pathname); } catch (_) {}
   };
 });
+
+// Deep-link: /#trim opens the Trim tab (used by nav links on other pages)
+(function(){
+  if (location.hash === '#trim') {
+    var t = document.querySelector('.tabBtn[data-tab="trim"]');
+    if (t) t.click();
+  }
+})();
 
 // ——— VIDEO ———
 let ffmpeg = null;
