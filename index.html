@@ -1339,6 +1339,7 @@ function removeVFile(id) {
   const [item] = vFiles.splice(i, 1);
   if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
   if (item.downloadUrl) URL.revokeObjectURL(item.downloadUrl);
+  VSTORE.del(item.id);
   renderV();
 }
 
@@ -1371,10 +1372,12 @@ function addVFiles(list) {
       const audioOuts = ['mp3','wav','aac','ogg','flac','m4a','wma','opus','aiff','alac'];
       if (!isAudio || audioOuts.includes(pendingOut)) out = pendingOut; // audio in -> audio out only
     }
-    vFiles.push({
+    const entry = {
       id: (crypto.randomUUID?.() || Math.random().toString(36).slice(2)), file: f,
       out, status: 'ready', previewUrl: URL.createObjectURL(f), isAudio, outSize: 0
-    });
+    };
+    vFiles.push(entry);
+    VSTORE.put(entry);
     added++;
   }
   vInput.value = '';
@@ -1435,6 +1438,7 @@ function clearVFiles() {
   if (vFiles.some(f => f.status === 'converting') || batchConverting) return;
   for (const it of vFiles) { if (it.previewUrl) URL.revokeObjectURL(it.previewUrl); if (it.downloadUrl) URL.revokeObjectURL(it.downloadUrl); }
   vFiles.length = 0; vSelectedId = null;
+  VSTORE.clear();
   renderV();
 }
 
@@ -1444,6 +1448,7 @@ function renderV() {
   vWorkspace.style.display = has ? 'block' : 'none';
   if (!has) { vSelectedId = null; shareToTrimmer(null); return; }
   if (!vFiles.some(f => f.id === vSelectedId)) vSelectedId = vFiles[0].id;
+  rememberVSelection();
   const item = vSelected();
   renderVChips(item);
   renderVWork(item);
@@ -1507,6 +1512,7 @@ function renderVWork(item) {
 vOutSel.onchange = () => {
   const item = vSelected(); if (!item) return;
   item.out = vOutSel.value; item.status = 'ready'; item.outSize = 0;
+  VSTORE.put(item);
   renderV();
 };
 vConvertBtn.onclick = () => {
@@ -2212,6 +2218,84 @@ tDeleteBtn.onclick = deleteSelection;
 tSaveBtn.onclick = saveVideo;
 
 
+// ——— Persistent video store (IndexedDB): loaded videos survive page navigation ———
+// Files stay on the device; cleared only via Clear / remove / replace.
+const VSTORE = {
+  db: null, ready: null,
+  open() {
+    if (this.ready) return this.ready;
+    this.ready = new Promise((resolve) => {
+      try {
+        const req = indexedDB.open('jsm-video', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('files', { keyPath: 'id' });
+        req.onsuccess = () => { VSTORE.db = req.result; resolve(true); };
+        req.onerror = () => resolve(false);
+      } catch (_) { resolve(false); }
+    });
+    return this.ready;
+  },
+  tx(mode, fn) {
+    return new Promise((res, rej) => {
+      try {
+        const t = VSTORE.db.transaction('files', mode);
+        fn(t.objectStore('files'));
+        t.oncomplete = () => res();
+        t.onerror = () => rej(t.error);
+      } catch (e) { rej(e); }
+    });
+  },
+  async put(item) {
+    if (!(await this.open())) return;
+    try {
+      await this.tx('readwrite', st => st.put({ id: item.id, name: item.file.name, type: item.file.type, size: item.file.size, lastModified: item.file.lastModified, blob: item.file, out: item.out, addedAt: Date.now() }));
+    } catch (_) { /* quota / private mode: memory-only */ }
+  },
+  async del(id) {
+    if (!(await this.open())) return;
+    try { await this.tx('readwrite', st => st.delete(id)); } catch (_) {}
+  },
+  async clear() {
+    if (!(await this.open())) return;
+    try { await this.tx('readwrite', st => st.clear()); } catch (_) {}
+    try { localStorage.removeItem('jsm-video-selected'); } catch (_) {}
+  },
+  async all() {
+    if (!(await this.open())) return [];
+    try {
+      const rows = await new Promise((res, rej) => {
+        const t = VSTORE.db.transaction('files', 'readonly');
+        const q = t.objectStore('files').getAll();
+        q.onsuccess = () => res(q.result || []);
+        q.onerror = () => rej(q.error);
+      });
+      return rows.sort((a, b) => a.addedAt - b.addedAt);
+    } catch (_) { return []; }
+  }
+};
+
+function rememberVSelection() {
+  try { localStorage.setItem('jsm-video-selected', vSelectedId || ''); } catch (_) {}
+}
+
+// Restore persisted videos on page load (async; runs after the trimmer section).
+async function restoreVFiles() {
+  const rows = await VSTORE.all();
+  if (!rows.length) return;
+  for (const r of rows) {
+    try {
+      const file = new File([r.blob], r.name, { type: r.type, lastModified: r.lastModified });
+      vFiles.push({ id: r.id, file, out: r.out || (r.type.startsWith('audio/') ? 'mp3' : 'mp4'), status: 'ready', previewUrl: URL.createObjectURL(file), isAudio: r.type.startsWith('audio/'), outSize: 0 });
+    } catch (_) { /* skip unreadable entry */ }
+  }
+  if (!vFiles.length) return;
+  try {
+    const sel = localStorage.getItem('jsm-video-selected');
+    if (sel && vFiles.some(f => f.id === sel)) vSelectedId = sel;
+  } catch (_) {}
+  renderV();
+  vStatus.textContent = `Restored ${vFiles.length} file${vFiles.length === 1 ? '' : 's'} from your last visit — Clear removes ${vFiles.length === 1 ? 'it' : 'them'}.`;
+}
+
 // ——— Shared video between converter and trim tabs ———
 // The trimmer always mirrors the converter's selected video file.
 // Loading a video in either tab makes it available in the other;
@@ -2252,6 +2336,7 @@ function trimmerPick(files) {
 document.getElementById('tNewBtn').onclick = () => { tInput.value = ''; tInput.click(); };
 setupDrop(tDrop, tInput, trimmerPick);
 window.__trimReady = true;
+restoreVFiles();
 
 </script>
 
