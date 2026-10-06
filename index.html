@@ -618,6 +618,8 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 .tl-handle:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
 .tl-cuts { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .tl-cut { position: absolute; top: 0; bottom: 0; background: rgba(239,68,68,.45); border-left: 1px solid #ef4444; border-right: 1px solid #ef4444; }
+.tl-bleeps { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.tl-bleep { position: absolute; top: 0; bottom: 0; background: rgba(250,204,21,.32); border-left: 2px solid #eab308; border-right: 2px solid #eab308; }
 .tl-playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 6px rgba(0,0,0,.6); pointer-events: none; z-index: 2; }
 .tl-playhead::before { content: ''; position: absolute; top: -1px; left: -5px; border: 6px solid transparent; border-top: 8px solid #fff; }
 </style>
@@ -633,6 +635,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
       <div class="tabs" role="tablist" aria-label="Converter type" style="margin-right:12px">
         <button class="tabBtn active" data-tab="video" role="tab" aria-selected="true">🎬 Video & Audio</button>
         <button class="tabBtn" data-tab="trim" role="tab" aria-selected="false">✂️ Trim</button>
+        <button class="tabBtn" data-tab="bleep" role="tab" aria-selected="false">🔇 Bleep</button>
       </div>
       <nav class="navLinks">
         <a href="/subtitle/">📝 Subtitle Toolkit</a>
@@ -928,6 +931,95 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
       </div>
 
       
+      <div id="bleepTab" style="display:none">
+        <div class="card">
+          <h1 class="hero-title">🔇 Video Bleep Censoring</h1>
+          <p class="hero-sub">Mark the parts to silence — mute them, cover them with a beep, or use your own censor sound. The picture stays untouched.</p>
+          <div class="privacy-pills">
+            <span class="pill">🔒 No upload</span>
+            <span class="pill">🎬 Video untouched</span>
+            <span class="pill">Files stay on device</span>
+          </div>
+
+          <div class="progress-wrap" id="bProgressWrap" style="margin-bottom:16px"><div class="progress-bar" id="bProgressBar" style="width:0%"></div></div>
+
+          <div id="bDrop" class="drop" tabindex="0" role="button" aria-label="Drop a video to censor">
+            <div class="plus">+</div>
+            <div class="drop-title">Drop a video here or click to browse</div>
+            <div class="drop-hint">MP4 · MOV · MKV · WebM · and more</div>
+            <input id="bInput" type="file" accept="video/*" hidden>
+          </div>
+
+          <div id="bEditor" style="display:none">
+            <div class="tEditGrid">
+              <div>
+                <div style="margin-bottom:12px">
+                  <video id="bPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
+                </div>
+                <div id="bFileMeta" class="vPrevMeta" style="margin-bottom:12px;border:1px solid var(--border);border-radius:12px"></div>
+                <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="bDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Censored: <b id="bCensored" style="color:var(--text)">—</b></div>
+
+                <div id="bTimeline" class="tl" aria-label="Bleep timeline — drag the blue handles to select a part to censor">
+                  <div id="bStrip" class="tl-strip"></div>
+                  <div id="bRegionsLayer" class="tl-bleeps"></div>
+                  <div id="bSelBox" class="tl-selbox"></div>
+                  <div id="bPlayhead" class="tl-playhead" style="display:none"></div>
+                  <div id="bHandleS" class="tl-handle" role="slider" tabindex="0" aria-label="Selection start handle"></div>
+                  <div id="bHandleE" class="tl-handle" role="slider" tabindex="0" aria-label="Selection end handle"></div>
+                </div>
+                <div id="bRegionsRow" style="display:none;margin-bottom:12px">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Censored parts — tap ✕ to remove:</div>
+                  <div id="bRegionsChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+                </div>
+              </div>
+              <aside class="tTools" aria-label="Bleep tools">
+                <div style="font-weight:700;margin-bottom:12px">🔇 Bleep tools</div>
+                <div style="display:grid;gap:10px;margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                    <label for="bStartNum" style="font-weight:600;font-size:13px">Start</label>
+                    <div style="display:flex;gap:6px;align-items:center">
+                      <input id="bStartNum" type="number" min="0" step="0.1" value="0" aria-label="Censor start in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                      <span style="font-size:12px;color:var(--muted)">sec</span>
+                      <button id="bStartNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set start to the player's current time">⏱ now</button>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                    <label for="bEndNum" style="font-weight:600;font-size:13px">End</label>
+                    <div style="display:flex;gap:6px;align-items:center">
+                      <input id="bEndNum" type="number" min="0" step="0.1" value="0" aria-label="Censor end in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                      <span style="font-size:12px;color:var(--muted)">sec</span>
+                      <button id="bEndNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set end to the player's current time">⏱ now</button>
+                    </div>
+                  </div>
+                </div>
+
+                <button id="bMarkBtn" class="btn btn-blue" style="width:100%;margin-bottom:14px">＋ Mark selection as censored</button>
+
+                <div style="font-weight:600;font-size:13px;margin-bottom:8px">Censor sound</div>
+                <div style="display:grid;gap:8px;margin-bottom:8px" role="radiogroup" aria-label="Censor sound">
+                  <label class="tModeCard"><input type="radio" name="bSound" value="beep" checked> <span><b>📢 Default beep</b><small>Classic 1000 Hz censor tone.</small></span></label>
+                  <label class="tModeCard"><input type="radio" name="bSound" value="mute"> <span><b>🔇 Mute</b><small>Silence the marked parts completely.</small></span></label>
+                  <label class="tModeCard"><input type="radio" name="bSound" value="custom"> <span><b>🎵 Custom sound</b><small>Upload your own censor sound below.</small></span></label>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+                  <button id="bSoundBtn" type="button" class="btn btn-ghost" style="font-size:13px">＋ Upload sound</button>
+                  <span id="bSoundName" style="font-size:12.5px;color:var(--muted);overflow-wrap:break-word"></span>
+                  <button id="bSoundX" type="button" class="btn btn-ghost" style="font-size:12px;display:none" title="Remove custom sound">✕</button>
+                  <input id="bSoundInput" type="file" accept="audio/*" hidden>
+                </div>
+
+                <div style="display:grid;gap:8px">
+                  <button id="bSaveBtn" class="btn btn-green">💾 Save video</button>
+                  <button id="bNewBtn" class="btn btn-ghost">Choose another file</button>
+                  <a id="bDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+                </div>
+                <div id="bStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
+              </aside>
+            </div>
+          </div>
+
+        </div>
+      </div>
       <!-- POPULAR CONVERSIONS -->
       <section class="card mt-5" id="popular">
         <h2 class="section-title">Popular conversions</h2>
@@ -1085,17 +1177,20 @@ document.querySelectorAll('.tabBtn').forEach(b => {
     b.setAttribute('aria-selected', 'true');
     document.getElementById('videoTab').style.display = b.dataset.tab === 'video' ? 'block' : 'none';
     document.getElementById('trimTab').style.display = b.dataset.tab === 'trim' ? 'block' : 'none';
+    document.getElementById('bleepTab').style.display = b.dataset.tab === 'bleep' ? 'block' : 'none';
     try {
       if (b.dataset.tab === 'trim') history.replaceState(null, '', '#trim');
-      else if (location.hash === '#trim') history.replaceState(null, '', location.pathname + location.search);
+      else if (b.dataset.tab === 'bleep') history.replaceState(null, '', '#bleep');
+      else if (location.hash === '#trim' || location.hash === '#bleep') history.replaceState(null, '', location.pathname + location.search);
     } catch (_) {}
   };
 });
 
-// Deep-link: /#trim opens the Trim tab (used by nav links on other pages)
+// Deep-link: /#trim and /#bleep open their tabs (used by nav links on other pages)
 (function(){
-  if (location.hash === '#trim') {
-    var t = document.querySelector('.tabBtn[data-tab="trim"]');
+  var h = location.hash === '#trim' ? 'trim' : location.hash === '#bleep' ? 'bleep' : null;
+  if (h) {
+    var t = document.querySelector('.tabBtn[data-tab="' + h + '"]');
     if (t) t.click();
   }
 })();
@@ -1460,13 +1555,14 @@ function renderV() {
   const has = vFiles.length > 0;
   vDrop.classList.toggle('hidden', has);
   vWorkspace.style.display = has ? 'block' : 'none';
-  if (!has) { vSelectedId = null; shareToTrimmer(null); return; }
+  if (!has) { vSelectedId = null; shareToTrimmer(null); shareToBleep(null); return; }
   if (!vFiles.some(f => f.id === vSelectedId)) vSelectedId = vFiles[0].id;
   rememberVSelection();
   const item = vSelected();
   renderVChips(item);
   renderVWork(item);
   shareToTrimmer(item);
+  shareToBleep(item);
 }
 
 function renderVChips(item) {
@@ -2388,6 +2484,458 @@ tToConverter.onclick = () => {
 setupDrop(tDrop, tInput, trimmerPick);
 window.__trimReady = true;
 restoreVFiles();
+
+
+// ——— BLEEP ———
+let bFile = null, bDuration = 0, bBleeding = false, bPlayerUrl = null;
+let bRegions = []; // {id, s, e} — censored parts, all use the selected censor sound
+let bStripToken = 0;
+let bCustom = null, bCustomBuf = null; // {file, name}
+const bDrop = document.getElementById('bDrop');
+const bInput = document.getElementById('bInput');
+const bEditor = document.getElementById('bEditor');
+const bPlayer = document.getElementById('bPlayer');
+const bFileMeta = document.getElementById('bFileMeta');
+const bStartNum = document.getElementById('bStartNum');
+const bEndNum = document.getElementById('bEndNum');
+const bTimeline = document.getElementById('bTimeline');
+const bStrip = document.getElementById('bStrip');
+const bRegionsLayer = document.getElementById('bRegionsLayer');
+const bSelBox = document.getElementById('bSelBox');
+const bPlayhead = document.getElementById('bPlayhead');
+const bHandleS = document.getElementById('bHandleS');
+const bHandleE = document.getElementById('bHandleE');
+const bMarkBtn = document.getElementById('bMarkBtn');
+const bSaveBtn = document.getElementById('bSaveBtn');
+const bRegionsRow = document.getElementById('bRegionsRow');
+const bRegionsChips = document.getElementById('bRegionsChips');
+const bStatus = document.getElementById('bStatus');
+const bDownload = document.getElementById('bDownload');
+const bProgressWrap = document.getElementById('bProgressWrap');
+const bProgressBar = document.getElementById('bProgressBar');
+const bSoundBtn = document.getElementById('bSoundBtn');
+const bSoundInput = document.getElementById('bSoundInput');
+const bSoundName = document.getElementById('bSoundName');
+const bSoundX = document.getElementById('bSoundX');
+
+function bSoundMode() {
+  const el = document.querySelector('input[name="bSound"]:checked');
+  return el ? el.value : 'beep';
+}
+function clampB(v) {
+  v = parseFloat(v);
+  if (!isFinite(v)) return 0;
+  return Math.min(bDuration, Math.max(0, v));
+}
+function bSelValid() {
+  const s = clampB(bStartNum.value), e = clampB(bEndNum.value);
+  return bDuration > 0 && s < e && e <= bDuration + 1e-6;
+}
+function bUpdateReadout() {
+  document.getElementById('bDuration').textContent = bDuration > 0 ? fmtT(bDuration) : '—';
+  const cens = bRegions.reduce((a, r) => a + (r.e - r.s), 0);
+  document.getElementById('bCensored').textContent =
+    bRegions.length ? `${fmtT(cens)} (${bRegions.length} part${bRegions.length === 1 ? '' : 's'})` : '—';
+  bMarkBtn.disabled = !bSelValid() || bBleeding;
+  bSaveBtn.disabled = bBleeding || !bFile || !bRegions.length;
+  bUpdateTimeline();
+}
+function bindBNum(num) {
+  num.addEventListener('focus', () => { try { num.select(); } catch (_) {} });
+  num.addEventListener('input', bUpdateReadout);
+  num.addEventListener('change', () => { num.value = clampB(num.value).toFixed(1); bUpdateReadout(); });
+}
+bindBNum(bStartNum); bindBNum(bEndNum);
+
+function bTlTimeFromClientX(clientX) {
+  const r = bTimeline.getBoundingClientRect();
+  const x = Math.min(Math.max(clientX - r.left, 0), r.width);
+  return bDuration > 0 ? (x / r.width) * bDuration : 0;
+}
+function bUpdateTimeline() {
+  if (!bTimeline || bDuration <= 0) return;
+  const s = clampB(bStartNum.value), e = clampB(bEndNum.value);
+  const sp = (s / bDuration) * 100, ep = (e / bDuration) * 100;
+  bHandleS.style.left = sp + '%';
+  bHandleE.style.left = ep + '%';
+  bHandleS.setAttribute('aria-valuenow', s.toFixed(1));
+  bHandleE.setAttribute('aria-valuenow', e.toFixed(1));
+  bSelBox.style.left = sp + '%';
+  bSelBox.style.width = Math.max(0, ep - sp) + '%';
+}
+function bindBHandle(handle, isStart) {
+  handle.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+    const move = (ev) => {
+      const t = bTlTimeFromClientX(ev.clientX);
+      if (isStart) {
+        const v = Math.min(t, Math.max(0, clampB(bEndNum.value) - 0.1));
+        bStartNum.value = v.toFixed(1);
+      } else {
+        const v = Math.max(t, Math.min(bDuration, clampB(bStartNum.value) + 0.1));
+        bEndNum.value = v.toFixed(1);
+      }
+      bUpdateReadout();
+    };
+    const up = () => {
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', up);
+      handle.removeEventListener('pointercancel', up);
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', up);
+    handle.addEventListener('pointercancel', up);
+  });
+  handle.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 1 : 0.1;
+    let v = clampB((isStart ? bStartNum : bEndNum).value);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v -= step;
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v += step;
+    else return;
+    e.preventDefault();
+    v = clampB(v);
+    if (isStart) v = Math.min(v, clampB(bEndNum.value) - 0.1);
+    else v = Math.max(v, clampB(bStartNum.value) + 0.1);
+    (isStart ? bStartNum : bEndNum).value = v.toFixed(1);
+    bUpdateReadout();
+  });
+}
+bindBHandle(bHandleS, true);
+bindBHandle(bHandleE, false);
+
+// click / scrub on the strip seeks the player
+bTimeline.addEventListener('pointerdown', (e) => {
+  if (e.target === bHandleS || e.target === bHandleE) return;
+  const seek = (ev) => { try { bPlayer.currentTime = bTlTimeFromClientX(ev.clientX); } catch (_) {} };
+  seek(e);
+  const move = (ev) => seek(ev);
+  const up = () => {
+    bTimeline.removeEventListener('pointermove', move);
+    bTimeline.removeEventListener('pointerup', up);
+    bTimeline.removeEventListener('pointercancel', up);
+  };
+  bTimeline.addEventListener('pointermove', move);
+  bTimeline.addEventListener('pointerup', up);
+  bTimeline.addEventListener('pointercancel', up);
+});
+
+function bUpdatePlayhead() {
+  if (!bTimeline || bDuration <= 0 || !bPlayer.duration) { bPlayhead.style.display = 'none'; return; }
+  bPlayhead.style.display = 'block';
+  bPlayhead.style.left = (bPlayer.currentTime / bDuration * 100) + '%';
+}
+
+// ——— live censor preview (Web Audio) ———
+let bAC = null, bOsc = null, bSrc = null, bGain = null, bCensorState = null;
+function bAudio() {
+  if (!bAC) bAC = new (window.AudioContext || window.webkitAudioContext)();
+  if (bAC.state === 'suspended') bAC.resume();
+  return bAC;
+}
+function bCensorPreview(mode) { // mode: 'beep' | 'mute' | 'custom' | null
+  if (bCensorState === mode) return;
+  bCensorOff();
+  if (!mode) return;
+  const ac = bAudio();
+  bPlayer.muted = true;
+  if (mode === 'mute') { bCensorState = 'mute'; return; }
+  bGain = ac.createGain(); bGain.gain.value = 0.5; bGain.connect(ac.destination);
+  if (mode === 'beep') {
+    bOsc = ac.createOscillator(); bOsc.type = 'sine'; bOsc.frequency.value = 1000;
+    bOsc.connect(bGain); bOsc.start();
+  } else if (mode === 'custom' && bCustomBuf) {
+    bSrc = ac.createBufferSource(); bSrc.buffer = bCustomBuf; bSrc.loop = true;
+    bSrc.connect(bGain); bSrc.start();
+  }
+  bCensorState = mode;
+}
+function bCensorOff() {
+  try { bOsc?.stop(); } catch (_) {}
+  try { bSrc?.stop(); } catch (_) {}
+  try { bGain?.disconnect(); } catch (_) {}
+  bOsc = bSrc = bGain = null;
+  if (bPlayer) bPlayer.muted = false;
+  bCensorState = null;
+}
+bPlayer.addEventListener('timeupdate', () => {
+  bUpdatePlayhead();
+  const t = bPlayer.currentTime || 0;
+  const hit = bRegions.some(r => t >= r.s && t <= r.e);
+  bCensorPreview(hit ? bSoundMode() : null);
+});
+bPlayer.addEventListener('pause', () => bCensorPreview(null));
+bPlayer.addEventListener('seeking', () => bCensorPreview(null));
+bPlayer.addEventListener('ended', () => bCensorPreview(null));
+bPlayer.onloadedmetadata = () => {
+  bDuration = bPlayer.duration || 0;
+  for (const el of [bStartNum, bEndNum]) { el.max = bDuration.toFixed(1); }
+  bStartNum.value = '0.0';
+  bEndNum.value = bDuration.toFixed(1);
+  bUpdateReadout();
+  buildBStrip();
+};
+
+// filmstrip thumbnails, generated by seeking a scratch video element
+async function buildBStrip() {
+  const token = ++bStripToken;
+  bStrip.innerHTML = '';
+  if (!bPlayerUrl || bDuration <= 0) return;
+  try {
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.src = bPlayerUrl;
+    await new Promise((res, rej) => {
+      v.onloadedmetadata = res; v.onerror = rej;
+      setTimeout(() => rej(new Error('thumb-timeout')), 8000);
+    });
+    if (token !== bStripToken) return;
+    const dur = v.duration || bDuration;
+    const N = Math.max(6, Math.min(16, Math.round((bTimeline.clientWidth || 960) / 80)));
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 72;
+    const ctx = canvas.getContext('2d');
+    const seekTo = (t) => new Promise((res) => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; v.removeEventListener('seeked', finish); res(); } };
+      v.addEventListener('seeked', finish);
+      try { v.currentTime = Math.min(Math.max(t, 0), Math.max(0, dur - 0.1)); }
+      catch (_) { finish(); }
+      setTimeout(finish, 1200);
+    });
+    for (let i = 0; i < N; i++) {
+      if (token !== bStripToken) return;
+      await seekTo(((i + 0.5) / N) * dur);
+      try {
+        ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/jpeg', 0.55);
+        img.alt = ''; img.draggable = false;
+        bStrip.appendChild(img);
+      } catch (_) {}
+    }
+    v.removeAttribute('src'); v.load();
+  } catch (_) { /* thumbnails are optional — the timeline still works on the dark strip */ }
+}
+
+// ——— censored regions ———
+function mergeBRegions() {
+  bRegions.sort((a, b) => a.s - b.s);
+  const out = [];
+  for (const r of bRegions) {
+    const last = out[out.length - 1];
+    if (last && r.s <= last.e + 0.05) last.e = Math.max(last.e, r.e);
+    else out.push({ ...r });
+  }
+  bRegions = out;
+}
+function renderBRegions() {
+  bRegionsLayer.innerHTML = '';
+  if (bDuration > 0) {
+    for (const r of bRegions) {
+      const d = document.createElement('div');
+      d.className = 'tl-bleep';
+      d.style.left = (r.s / bDuration * 100) + '%';
+      d.style.width = Math.max(0.4, (r.e - r.s) / bDuration * 100) + '%';
+      d.title = `Censored ${fmtT(r.s)} – ${fmtT(r.e)}`;
+      bRegionsLayer.appendChild(d);
+    }
+  }
+  bRegionsChips.innerHTML = '';
+  bRegionsRow.style.display = bRegions.length ? 'block' : 'none';
+  bRegions.forEach((r, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn btn-ghost';
+    b.style.cssText = 'font-size:12px;padding:6px 10px';
+    b.textContent = `🔇 ${fmtT(r.s)}–${fmtT(r.e)} ✕`;
+    b.title = 'Remove this censored part';
+    b.onclick = () => { bRegions.splice(i, 1); renderBRegions(); bUpdateReadout(); };
+    bRegionsChips.appendChild(b);
+  });
+}
+bMarkBtn.onclick = () => {
+  if (!bSelValid()) { bStatus.textContent = 'Select a valid part first (Start < End).'; return; }
+  bRegions.push({
+    id: (crypto.randomUUID?.() || Math.random().toString(36).slice(2)),
+    s: clampB(bStartNum.value), e: clampB(bEndNum.value)
+  });
+  mergeBRegions();
+  renderBRegions();
+  bUpdateReadout();
+  bStatus.textContent = '';
+};
+
+// ——— custom censor sound ———
+bSoundBtn.onclick = () => { bSoundInput.value = ''; bSoundInput.click(); };
+bSoundInput.onchange = async (e) => {
+  const f = e.target.files[0];
+  bSoundInput.value = '';
+  if (!f) return;
+  try {
+    const ac = bAudio();
+    const buf = await ac.decodeAudioData(await f.arrayBuffer());
+    bCustom = { file: f, name: f.name };
+    bCustomBuf = buf;
+    bSoundName.textContent = '🎵 ' + f.name;
+    bSoundX.style.display = '';
+    document.querySelector('input[name="bSound"][value="custom"]').checked = true;
+    bStatus.textContent = '';
+  } catch (_) {
+    bStatus.textContent = 'Could not read that audio file — try MP3 or WAV.';
+  }
+};
+bSoundX.onclick = () => {
+  bCustom = null; bCustomBuf = null;
+  bSoundName.textContent = ''; bSoundX.style.display = 'none';
+  document.querySelector('input[name="bSound"][value="beep"]').checked = true;
+};
+
+// ——— shared file: the bleep tab mirrors the converter's selected video ———
+function setBleepFile(f) {
+  if (!f) return;
+  if (!f.type.startsWith('video/')) { bStatus.textContent = 'Please choose a video file.'; return; }
+  if (bPlayerUrl) URL.revokeObjectURL(bPlayerUrl);
+  if (bDownload.href && bDownload.href.startsWith('blob:')) URL.revokeObjectURL(bDownload.href);
+  bFile = f;
+  bPlayerUrl = URL.createObjectURL(f);
+  bPlayer.src = bPlayerUrl;
+  bEditor.style.display = 'block';
+  bDrop.style.display = 'none';
+  bDownload.style.display = 'none';
+  bRegions = []; renderBRegions();
+  const ext = ((f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^\w]/g, '')) || 'mp4';
+  bFileMeta.innerHTML = `<b style="color:var(--text)">${escapeHtml(f.name)}</b> &nbsp;·&nbsp; ${escapeHtml(ext.toUpperCase())} &nbsp;·&nbsp; ${fmtSize(f.size)}`;
+  bStatus.textContent = '';
+  loadFFmpeg().catch(() => {});
+}
+function clearBleepFile() {
+  bEditor.style.display = 'none';
+  bDrop.style.display = '';
+  bInput.value = '';
+  bStripToken++; bStrip.innerHTML = '';
+  bPlayhead.style.display = 'none';
+  bCensorPreview(null);
+  if (bPlayerUrl) { URL.revokeObjectURL(bPlayerUrl); bPlayerUrl = null; }
+  bPlayer.removeAttribute('src'); bPlayer.load();
+  bFile = null; bDuration = 0; bStatus.textContent = '';
+  bRegions = []; renderBRegions();
+  bFileMeta.innerHTML = '';
+  bUpdateReadout();
+}
+function shareToBleep(item) {
+  if (!window.__bleepReady) return;
+  const f = (item && !item.isAudio) ? item.file : null;
+  if (f && bFile === f) return;
+  if (!f && !bFile) return;
+  if (f) setBleepFile(f); else clearBleepFile();
+}
+function bleepPick(files) {
+  const f = files && files[0];
+  bInput.value = '';
+  if (!f) return;
+  if (!f.type.startsWith('video/')) { bStatus.textContent = 'Please choose a video file.'; return; }
+  addVFiles([f]);
+  selectVFileByFile(f);
+  renderV();
+}
+
+
+// ——— bleep render ———
+async function saveBleep() {
+  if (!bFile || bBleeding) return;
+  if (!bRegions.length) { bStatus.textContent = 'Mark at least one part to censor first.'; return; }
+  if (typeof vActiveExec !== 'undefined' && vActiveExec) { bStatus.textContent = 'A conversion is still running — please wait, then save.'; return; }
+  const mode = bSoundMode();
+  if (mode === 'custom' && !bCustom) { bStatus.textContent = 'Upload a custom sound first, or pick Beep / Mute.'; return; }
+  try { await loadFFmpeg(); }
+  catch { bStatus.textContent = 'Engine not ready. Try again in a moment.'; return; }
+  bBleeding = true; bUpdateReadout();
+  bProgressWrap.classList.add('show'); bProgressBar.style.width = '5%';
+  const tmpFiles = [];
+  let customName = '';
+  try {
+    const ext = ((bFile.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^\w]/g, '')) || 'mp4';
+    const rawBase = (bFile.name.replace(/\.[^.]+$/, '') || 'video').replace(/[^\w.-]/g, '_').slice(0, 60) || 'video';
+    const safeBase = rawBase.replace(/^(edited-|trimmed-|bleeped-)+/, '') || 'video';
+    const inName = `bleep-in-${Date.now()}.${ext}`;
+    tmpFiles.push(inName);
+    await ffmpeg.writeFile(inName, await fetchFile(bFile));
+    // probe: the video must have an audio track to censor
+    bStatus.textContent = 'Checking audio track…';
+    const probeCode = await ffmpeg.exec(['-i', inName, '-map', '0:a', '-c', 'copy', '-f', 'null', '-']);
+    if (probeCode !== 0) throw new Error('no-audio');
+    const expr = bRegions.map(r => `between(t,${r.s.toFixed(3)},${r.e.toFixed(3)})`).join('+');
+    const dur = Math.max(1, bDuration || 1).toFixed(1);
+    let filter;
+    if (mode === 'mute') {
+      filter = `[0:a]volume='if(${expr},0,1)':eval=frame,aresample=48000,aformat=channel_layouts=stereo[aout]`;
+    } else {
+      const parts = [`[0:a]volume='if(${expr},0,1)':eval=frame,aresample=48000,aformat=channel_layouts=stereo[muted]`];
+      const mix = ['[muted]'];
+      if (mode === 'beep') {
+        parts.push(`sine=frequency=1000:duration=${dur}:sample_rate=48000[sin]`);
+        parts.push(`[sin]volume='if(${expr},1,0)':eval=frame,aformat=channel_layouts=stereo[blp]`);
+        mix.push('[blp]');
+      } else {
+        const cext = ((bCustom.file.name.split('.').pop() || 'mp3').toLowerCase().replace(/[^\w]/g, '')) || 'mp3';
+        customName = `bleep-custom-${Date.now()}.${cext}`;
+        tmpFiles.push(customName);
+        await ffmpeg.writeFile(customName, await fetchFile(bCustom.file));
+        parts.push(`[1:a]aloop=loop=-1:size=2147483647,atrim=0:${dur},aresample=48000,aformat=channel_layouts=stereo[cs]`);
+        parts.push(`[cs]volume='if(${expr},1,0)':eval=frame[cblp]`);
+        mix.push('[cblp]');
+      }
+      parts.push(`${mix.join('')}amix=inputs=${mix.length}:duration=first:normalize=0[aout]`);
+      filter = parts.join(';');
+    }
+    const outName = `bleeped-${safeBase}.mp4`;
+    tmpFiles.push(outName);
+    bStatus.textContent = 'Rendering censored audio… (video stream is copied, no quality loss)';
+    bProgressBar.style.width = '40%';
+    const args = ['-i', inName];
+    if (mode === 'custom') args.push('-i', customName);
+    args.push('-filter_complex', filter, '-map', '0:v', '-map', '[aout]',
+      '-c:v', 'copy', '-c:a', 'aac', '-movflags', '+faststart', outName);
+    const rc = await ffmpeg.exec(args);
+    if (rc !== 0) throw new Error('render failed');
+    const data = await ffmpeg.readFile(outName);
+    if (!data || data.length < 1000) throw new Error('output too small');
+    if (bDownload.href && bDownload.href.startsWith('blob:')) URL.revokeObjectURL(bDownload.href);
+    bDownload.href = URL.createObjectURL(new Blob([data], { type: 'video/mp4' }));
+    bDownload.download = outName;
+    const sizeLabel = data.length < 1048576 ? `${Math.max(1, Math.round(data.length / 1024))} KB` : `${(data.length / 1048576).toFixed(1)} MB`;
+    bDownload.textContent = `⬇ Download ${outName} (${sizeLabel})`;
+    bDownload.style.display = 'inline-block';
+    bProgressBar.style.width = '100%';
+    const cens = bRegions.reduce((a, r) => a + (r.e - r.s), 0);
+    const how = mode === 'mute' ? 'Muted' : mode === 'beep' ? 'Beep' : 'Custom sound';
+    bStatus.textContent = `✅ Saved — ${bRegions.length} censored part${bRegions.length === 1 ? '' : 's'} (${fmtT(cens)} total) via ${how}.`;
+    setTimeout(() => { bProgressWrap.classList.remove('show'); bProgressBar.style.width = '0%'; }, 800);
+  } catch (e) {
+    console.error(e);
+    bStatus.textContent = e.message === 'no-audio'
+      ? 'This video has no audio track to censor.'
+      : 'Save failed: ' + (e.message || 'try a smaller file');
+    bProgressWrap.classList.remove('show');
+  } finally {
+    for (const n of tmpFiles) if (n) { try { await ffmpeg?.deleteFile(n); } catch (_) {} }
+    bBleeding = false; bUpdateReadout();
+  }
+}
+
+setupDrop(bDrop, bInput, bleepPick);
+document.getElementById('bNewBtn').onclick = () => { bInput.value = ''; bInput.click(); };
+document.getElementById('bStartNow').onclick = () => {
+  bStartNum.value = Math.min(bDuration, Math.max(0, bPlayer.currentTime || 0)).toFixed(1);
+  bUpdateReadout();
+};
+document.getElementById('bEndNow').onclick = () => {
+  bEndNum.value = Math.min(bDuration, Math.max(0, bPlayer.currentTime || 0)).toFixed(1);
+  bUpdateReadout();
+};
+bSaveBtn.onclick = saveBleep;
+window.__bleepReady = true;
 
 </script>
 
