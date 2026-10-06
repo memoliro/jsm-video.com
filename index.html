@@ -940,6 +940,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             <span class="pill">🎬 Video untouched</span>
             <span class="pill">Files stay on device</span>
           </div>
+          <p style="text-align:center;font-size:12.5px;color:var(--muted);margin:2px 0 16px">Only have an audio file? Bleep it at <a href="https://jsm-loudness.com/bleep-audio" target="_blank" rel="noopener" style="color:var(--primary)">jsm-loudness.com/bleep-audio</a> →</p>
 
           <div class="progress-wrap" id="bProgressWrap" style="margin-bottom:16px"><div class="progress-bar" id="bProgressBar" style="width:0%"></div></div>
 
@@ -2794,7 +2795,7 @@ bSoundX.onclick = () => {
 // ——— shared file: the bleep tab mirrors the converter's selected video ———
 function setBleepFile(f) {
   if (!f) return;
-  if (!f.type.startsWith('video/')) { bStatus.textContent = 'Please choose a video file.'; return; }
+  if (!f.type.startsWith('video/')) { bStatus.innerHTML = 'Please choose a video file — to bleep an audio file, try <a href="https://jsm-loudness.com/bleep-audio" target="_blank" rel="noopener" style="color:var(--primary)">jsm-loudness.com/bleep-audio</a>.'; return; }
   if (bPlayerUrl) URL.revokeObjectURL(bPlayerUrl);
   if (bDownload.href && bDownload.href.startsWith('blob:')) URL.revokeObjectURL(bDownload.href);
   bFile = f;
@@ -2834,7 +2835,7 @@ function bleepPick(files) {
   const f = files && files[0];
   bInput.value = '';
   if (!f) return;
-  if (!f.type.startsWith('video/')) { bStatus.textContent = 'Please choose a video file.'; return; }
+  if (!f.type.startsWith('video/')) { bStatus.innerHTML = 'Please choose a video file — to bleep an audio file, try <a href="https://jsm-loudness.com/bleep-audio" target="_blank" rel="noopener" style="color:var(--primary)">jsm-loudness.com/bleep-audio</a>.'; return; }
   addVFiles([f]);
   selectVFileByFile(f);
   renderV();
