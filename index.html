@@ -877,10 +877,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
           <div id="tEditor" style="display:none">
             <div class="tEditGrid">
               <div>
-                <div style="margin-bottom:12px">
-                  <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
+                <div class="vPrevCard" style="margin-bottom:12px">
+                  <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;display:block;background:#000"></video>
+                  <div id="tFileMeta" class="vPrevMeta"></div>
                 </div>
-                <div id="tFileMeta" class="vPrevMeta" style="margin-bottom:12px;border:1px solid var(--border);border-radius:12px"></div>
                 <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
 
                 <div id="tTimeline" class="tl" aria-label="Video timeline — drag the blue handles to set trim start and end">
@@ -964,10 +964,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
           <div id="bEditor" style="display:none">
             <div class="tEditGrid">
               <div>
-                <div style="margin-bottom:12px">
-                  <video id="bPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
+                <div class="vPrevCard" style="margin-bottom:12px">
+                  <video id="bPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;display:block;background:#000"></video>
+                  <div id="bFileMeta" class="vPrevMeta"></div>
                 </div>
-                <div id="bFileMeta" class="vPrevMeta" style="margin-bottom:12px;border:1px solid var(--border);border-radius:12px"></div>
                 <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="bDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Censored: <b id="bCensored" style="color:var(--text)">—</b></div>
 
                 <div id="bTimeline" class="tl" aria-label="Bleep timeline — drag the blue handles to select a part to censor">
