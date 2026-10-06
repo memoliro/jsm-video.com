@@ -574,8 +574,10 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 @media(max-width:720px){.logo{width:44px;height:44px;font-size:19px;border-radius:12px} .brand{font-size:1.05rem}}
 
 /* ——— Trim timeline (CapCut-style filmstrip) ——— */
-.tEditGrid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 16px; align-items: start; }
-.tTools { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.tEditGrid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,300px); gap: 16px; align-items: start; }
+.tEditGrid > * { min-width: 0; }
+.tTools { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-wrap: break-word; }
+#tDownload { white-space: normal; word-break: break-word; }
 @media (max-width: 860px) { .tEditGrid { grid-template-columns: 1fr; } }
 .tl { position: relative; height: 120px; border-radius: 12px; overflow: hidden; background: #0b1120; border: 1px solid var(--border); touch-action: none; user-select: none; -webkit-user-select: none; margin-bottom: 12px; cursor: crosshair; }
 .tl-strip { position: absolute; inset: 0; display: flex; }
@@ -2026,7 +2028,8 @@ async function saveVideo() {
   let inName = '', outName = '';
   const tmpFiles = [];
   try {
-    const safeBase = (tFile.name.replace(/\.[^.]+$/, '') || 'video').replace(/[^\w.-]/g, '_').slice(0, 60) || 'video';
+    const rawBase = (tFile.name.replace(/\.[^.]+$/, '') || 'video').replace(/[^\w.-]/g, '_').slice(0, 60) || 'video';
+    const safeBase = (rawBase.replace(/^(edited-|trimmed-)+/, '') || 'video');
     const ext = ((tFile.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^\w]/g, '')) || 'mp4';
     const segExt = fast ? ext : 'mp4';
     inName = `cut-in-${Date.now()}.${ext}`;
