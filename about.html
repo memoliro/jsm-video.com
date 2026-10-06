@@ -462,6 +462,7 @@ footer {
 button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: none; }
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
+.hright { display: flex; align-items: center; gap: 12px; }
 .navLinks a {
   font-size: 0.8125rem; font-weight: 700; color: var(--text);
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -469,8 +470,16 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
   transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
+.navLinks a.active { outline: 2px solid #60a5fa; outline-offset: 2px; }
 @media (max-width: 720px) {
-  .navLinks { display: none; }
+  .hright { flex-wrap: wrap; row-gap: 8px; }
+  .themeBtn { order: 2; margin-left: auto; }
+  .navLinks {
+    display: flex; order: 3; flex: 1 1 100%;
+    overflow-x: auto; gap: 8px; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .navLinks a { flex: 0 0 auto; padding: 8px 12px; }
 }
 
 .engineBanner{
@@ -500,10 +509,10 @@ body{max-width:800px;margin:0 auto;padding:20px;line-height:1.7}
       <span>JSM-Video.com</span>
       <span style="background:#16a34a;color:white;padding:2px 8px;border-radius:999px;font-size:12px">100% PRIVATE</span>
     </a>
-    <div style="display:flex;align-items:center;gap:12px">
-      <nav class="navLinks" style="display:flex;gap:12px">
+    <div class="hright">
+      <nav class="navLinks">
         <a href="/#articles">Articles</a>
-        <a href="/about.html">About</a>
+        <a href="/about.html" class="active">About</a>
       </nav>
       <button id="themeToggle" class="themeBtn" aria-label="Toggle light mode" title="Toggle theme">☀️</button>
     </div>

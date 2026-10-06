@@ -219,6 +219,7 @@ a:hover { color: var(--primary-hover); }
 .tabBtn.active {
   background: var(--card); color: var(--text);
   box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+  outline: 2px solid #60a5fa; outline-offset: 1px;
 }
 .themeBtn {
   width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--border);
@@ -522,6 +523,7 @@ footer {
 button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: none; }
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
+.hright { display: flex; align-items: center; gap: 12px; }
 .navLinks a {
   font-size: 0.8125rem; font-weight: 700; color: var(--text);
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -529,8 +531,17 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
   transition: all 0.15s ease; box-shadow: var(--shadow-sm);
 }
 .navLinks a:hover { color: var(--text); }
+.navLinks a.active { outline: 2px solid #60a5fa; outline-offset: 2px; }
 @media (max-width: 720px) {
-  .navLinks { display: none; }
+  .hright { flex-wrap: wrap; row-gap: 8px; }
+  .tabs { order: 1; }
+  .themeBtn { order: 2; margin-left: auto; }
+  .navLinks {
+    display: flex; order: 3; flex: 1 1 100%;
+    overflow-x: auto; gap: 8px; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .navLinks a { flex: 0 0 auto; padding: 8px 12px; }
 }
 
 .engineBanner{
@@ -557,7 +568,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
     <img src="/assets/favicon.svg" alt="JSM-Video.com" width="48" height="48" style="border-radius:12px">
     <span>JSM-Video.com</span>
     <span style="background:#16a34a;color:white;padding:2px 8px;border-radius:999px;font-size:12px">100% PRIVATE</span>
-  </a>    <div style="display:flex;align-items:center;gap:12px">
+  </a>    <div class="hright">
       <div class="tabs" role="tablist" aria-label="Converter type" style="margin-right:12px">
         <button class="tabBtn active" data-tab="video" role="tab" aria-selected="true">🎬 Video & Audio</button>
         <button class="tabBtn" data-tab="trim" role="tab" aria-selected="false">✂️ Trim</button>
