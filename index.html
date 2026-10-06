@@ -40,7 +40,7 @@
   "applicationCategory": "MultimediaApplication",
   "operatingSystem": "Any",
   "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
-  "featureList": ["private", "offline", "no upload", "ffmpeg wasm", "hardware acceleration", "rotate", "flip", "compress"],
+  "featureList": ["private", "offline", "no upload", "ffmpeg wasm", "hardware acceleration", "rotate", "flip", "compress", "trim"],
   "publisher": {"@type": "Organization", "name": "JSM-Video.com", "url": "https://JSM-Video.com/"}
 }
 </script>
@@ -51,7 +51,8 @@
   "mainEntity": [
     {"@type": "Question","name": "Are my files uploaded?","acceptedAnswer": {"@type": "Answer","text": "No. Everything runs locally in your browser using ffmpeg.wasm. Your files never leave your device."}},
     {"@type": "Question","name": "What is the max file size?","acceptedAnswer": {"@type": "Answer","text": "Best under 500 MB. Hard limit is 1 GB for browser stability. Larger files may need a desktop app."}},
-    {"@type": "Question","name": "Is it really free?","acceptedAnswer": {"@type": "Answer","text": "Yes, free forever, no watermarks, no credits. We are supported by ads after your consent."}}
+    {"@type": "Question","name": "Is it really free?","acceptedAnswer": {"@type": "Answer","text": "Yes, free forever, no watermarks, no credits. We are supported by ads after your consent."}},
+    {"@type": "Question","name": "Can I trim a video?","acceptedAnswer": {"@type": "Answer","text": "Yes. Use the Trim tab to cut any part of a video in your browser. Fast cut is instant (keyframe-accurate); Precise cut re-encodes for frame-exact results as MP4. Free, private, no watermark."}}
   ]
 }
 </script>
@@ -559,6 +560,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
   </a>    <div style="display:flex;align-items:center;gap:12px">
       <div class="tabs" role="tablist" aria-label="Converter type" style="margin-right:12px">
         <button class="tabBtn active" data-tab="video" role="tab" aria-selected="true">🎬 Video & Audio</button>
+        <button class="tabBtn" data-tab="trim" role="tab" aria-selected="false">✂️ Trim</button>
       </div>
       <nav class="navLinks">
         <a href="/subtitle/">📝 Subtitle Toolkit</a>
@@ -680,6 +682,79 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
         </div>
       </div>
 
+      <!-- TRIM TAB -->
+      <div id="trimTab" style="display:none">
+        <div class="card">
+          <h1 class="hero-title">Free Online Video Trimmer</h1>
+          <p class="hero-sub">Cut the exact part you want — entirely in your browser. No upload, no watermark.</p>
+          <div class="privacy-pills">
+            <span class="pill">🔒 No upload</span>
+            <span class="pill">✂️ No watermark</span>
+            <span class="pill">Files stay on device</span>
+          </div>
+
+          <div id="tEngineStatus" class="engineBanner" role="status" aria-live="polite">
+            <span id="tEngineTitle">Engine loads when you add a file</span>
+            <span id="tEngineDesc" style="color:var(--muted)">Nothing is downloaded until then — first load may take a moment</span>
+            <button id="tEngineRetry" class="btn btn-ghost" style="display:none;font-size:12px;padding:6px 12px">Retry</button>
+          </div>
+
+          <div class="progress-wrap" id="tProgressWrap" style="margin-top:-8px;margin-bottom:16px"><div class="progress-bar" id="tProgressBar" style="width:0%"></div></div>
+
+          <div id="tDrop" class="drop" tabindex="0" role="button" aria-label="Drop a video to trim">
+            <div class="plus">✂️</div>
+            <div class="drop-title">Drop a video to trim, or click to browse</div>
+            <div class="drop-hint">MP4 · MOV · MKV · WebM · and more</div>
+            <input id="tInput" type="file" accept="video/*" hidden>
+          </div>
+
+          <div id="tEditor" style="display:none">
+            <div style="margin-bottom:12px">
+              <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
+            </div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
+
+            <div style="display:grid;gap:14px;margin-bottom:14px">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px">
+                  <label for="tStartRange" style="font-weight:600;font-size:13px">Start</label>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <input id="tStartNum" type="number" min="0" step="0.1" value="0" aria-label="Start time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                    <span style="font-size:12px;color:var(--muted)">sec</span>
+                    <button id="tStartNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set start to the player's current time">⏱ now</button>
+                  </div>
+                </div>
+                <input id="tStartRange" type="range" min="0" max="100" step="0.1" value="0" style="width:100%" aria-label="Start time slider">
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px">
+                  <label for="tEndRange" style="font-weight:600;font-size:13px">End</label>
+                  <div style="display:flex;gap:6px;align-items:center">
+                    <input id="tEndNum" type="number" min="0" step="0.1" value="0" aria-label="End time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                    <span style="font-size:12px;color:var(--muted)">sec</span>
+                    <button id="tEndNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set end to the player's current time">⏱ now</button>
+                  </div>
+                </div>
+                <input id="tEndRange" type="range" min="0" max="100" step="0.1" value="0" style="width:100%" aria-label="End time slider">
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px" role="radiogroup" aria-label="Trim mode">
+              <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="fast" checked> <span>⚡ Fast cut</span></label>
+              <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="precise"> <span>🎯 Precise cut</span></label>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin:0 0 14px">Fast cut is instant but snaps to keyframes, so the start can land a second or two early. Precise cut re-encodes for frame-exact results (slower) and always saves as MP4.</p>
+
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button id="tTrimBtn" class="btn btn-blue">✂️ Trim video</button>
+              <button id="tNewBtn" class="btn btn-ghost">Choose another file</button>
+              <a id="tDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+            </div>
+            <div id="tStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
       
       <!-- POPULAR CONVERSIONS -->
       <section class="card mt-5" id="popular">
@@ -707,6 +782,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
           <div><strong>Is it free? Any watermark?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Free forever, no watermark, no account. We are supported by ads. Advertising and analytics remain disabled until you click Accept.</p></div>
           <div><strong>What is the max file size?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Best under 500 MB. Hard limit 1 GB for browser stability. For larger files, use Handbrake or Shutter Encoder desktop tools.</p></div>
           <div><strong>Which formats?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Video: MP4, MOV, MKV, WebM, AVI, FLV, WMV, M4V, 3GP, MPG, TS, MTS, MXF, GIF. Audio: MP3, WAV, AAC, OGG, FLAC, M4A, WMA, OPUS, AIFF, ALAC. Plus rotate, flip, compress, mute.</p></div>
+          <div><strong>Can I trim a video?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Yes — switch to the ✂️ Trim tab. Set start and end with the sliders or the player's current time, then pick Fast cut (instant, keyframe-snapped) or Precise cut (frame-exact, re-encodes to MP4). Private, free, no watermark.</p></div>
           <div><strong>Why is first load slow?</strong><p style="color:var(--muted);font-size:.875rem;margin-top:6px">Engine is ~25 MB WASM, cached after first load. Second conversion starts instantly. We show progress bar.</p></div>
         </div>
       </section>
@@ -827,7 +903,7 @@ themeBtn.onclick = () => {
   applyTheme(cur === 'dark' ? 'light' : 'dark');
 };
 
-// ——— Tabs ——— (Video & Audio only)
+// ——— Tabs ———
 document.querySelectorAll('.tabBtn').forEach(b => {
   b.onclick = () => {
     document.querySelectorAll('.tabBtn').forEach(x => {
@@ -836,7 +912,8 @@ document.querySelectorAll('.tabBtn').forEach(b => {
     });
     b.classList.add('active');
     b.setAttribute('aria-selected', 'true');
-    document.getElementById('videoTab').style.display = 'block';
+    document.getElementById('videoTab').style.display = b.dataset.tab === 'video' ? 'block' : 'none';
+    document.getElementById('trimTab').style.display = b.dataset.tab === 'trim' ? 'block' : 'none';
   };
 });
 
@@ -873,6 +950,16 @@ function setEngineUI(state, title, desc) {
   if (engineTitle) engineTitle.textContent = title;
   if (engineDesc) engineDesc.innerHTML = desc;
   if (engineRetry) engineRetry.style.display = state === 'error' ? 'inline-flex' : 'none';
+  const tES = document.getElementById('tEngineStatus');
+  if (tES) {
+    tES.className = 'engineBanner ' + state;
+    const tET = document.getElementById('tEngineTitle');
+    const tED = document.getElementById('tEngineDesc');
+    const tER = document.getElementById('tEngineRetry');
+    if (tET) tET.textContent = title;
+    if (tED) tED.innerHTML = desc || '';
+    if (tER) tER.style.display = state === 'error' ? 'inline-flex' : 'none';
+  }
   if (typeof vStatus !== 'undefined' && vStatus) {
     if (state === 'loading') vStatus.textContent = title;
     else if (state === 'ready') vStatus.textContent = '';
@@ -981,6 +1068,14 @@ async function loadCoreFrom() {
         vStatus.textContent = `Converting ${pct}%…`;
         vProgressBar.style.width = pct + '%';
         vProgressWrap.classList.add('show');
+        if (typeof tTrimming !== 'undefined' && tTrimming) {
+          const tPB = document.getElementById('tProgressBar');
+          const tPW = document.getElementById('tProgressWrap');
+          const tS = document.getElementById('tStatus');
+          if (tPB) tPB.style.width = pct + '%';
+          if (tPW) tPW.classList.add('show');
+          if (tS) tS.textContent = `Trimming ${pct}%…`;
+        }
       });
       await tryLoadCoreFromBase(base, useMultiThread, classWorkerURL);
       ffmpegMultiThreaded = useMultiThread;
@@ -1017,6 +1112,14 @@ async function loadFFmpeg(forceFresh = false) {
         vStatus.textContent = `Converting ${pct}%…`;
         vProgressBar.style.width = pct + '%';
         vProgressWrap.classList.add('show');
+        if (typeof tTrimming !== 'undefined' && tTrimming) {
+          const tPB = document.getElementById('tProgressBar');
+          const tPW = document.getElementById('tProgressWrap');
+          const tS = document.getElementById('tStatus');
+          if (tPB) tPB.style.width = pct + '%';
+          if (tPW) tPW.classList.add('show');
+          if (tS) tS.textContent = `Trimming ${pct}%…`;
+        }
       });
       await loadCoreFrom();
       loaded = true;
@@ -1542,6 +1645,145 @@ document.getElementById('vFlipH')?.addEventListener('change', updateVPreviewTran
 document.getElementById('vFlipV')?.addEventListener('change', updateVPreviewTransform);
 
 setupDrop(vDrop, vInput, addVFiles);
+
+
+// ——— TRIM ———
+let tFile = null, tDuration = 0, tTrimming = false, tPlayerUrl = null;
+const tDrop = document.getElementById('tDrop');
+const tInput = document.getElementById('tInput');
+const tEditor = document.getElementById('tEditor');
+const tPlayer = document.getElementById('tPlayer');
+const tStartRange = document.getElementById('tStartRange');
+const tStartNum = document.getElementById('tStartNum');
+const tEndRange = document.getElementById('tEndRange');
+const tEndNum = document.getElementById('tEndNum');
+const tTrimBtn = document.getElementById('tTrimBtn');
+const tStatus = document.getElementById('tStatus');
+const tDownload = document.getElementById('tDownload');
+const tProgressWrap = document.getElementById('tProgressWrap');
+const tProgressBar = document.getElementById('tProgressBar');
+
+function fmtT(sec) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec / 60);
+  const s = (sec - m * 60).toFixed(1);
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+function clampT(v) {
+  v = parseFloat(v);
+  if (!isFinite(v)) return 0;
+  return Math.min(tDuration, Math.max(0, v));
+}
+function trimRangeValid() {
+  const s = clampT(tStartNum.value), e = clampT(tEndNum.value);
+  return tDuration > 0 && s < e && e <= tDuration + 1e-6;
+}
+function updateTrimReadout() {
+  document.getElementById('tDuration').textContent = tDuration > 0 ? fmtT(tDuration) : '—';
+  const s = clampT(tStartNum.value), e = clampT(tEndNum.value);
+  document.getElementById('tSelLen').textContent = trimRangeValid() ? fmtT(e - s) : '—';
+  tTrimBtn.disabled = !trimRangeValid() || tTrimming;
+}
+function bindTrimPair(range, num) {
+  range.addEventListener('input', () => { num.value = parseFloat(range.value).toFixed(1); updateTrimReadout(); });
+  num.addEventListener('change', () => {
+    const v = clampT(num.value);
+    num.value = v.toFixed(1); range.value = v;
+    updateTrimReadout();
+  });
+}
+bindTrimPair(tStartRange, tStartNum);
+bindTrimPair(tEndRange, tEndNum);
+
+function setTNow(numEl, rangeEl) {
+  const t = Math.min(tDuration, Math.max(0, tPlayer.currentTime || 0));
+  numEl.value = t.toFixed(1); rangeEl.value = t;
+  updateTrimReadout();
+}
+document.getElementById('tStartNow').onclick = () => setTNow(tStartNum, tStartRange);
+document.getElementById('tEndNow').onclick = () => setTNow(tEndNum, tEndRange);
+document.getElementById('tEngineRetry').onclick = () => { loadingPromise = null; loadFFmpeg(true).catch(() => {}); };
+
+function setTrimFile(f) {
+  if (!f) return;
+  if (!f.type.startsWith('video/')) { tStatus.textContent = 'Please choose a video file — the trimmer works on video only.'; return; }
+  if (tPlayerUrl) URL.revokeObjectURL(tPlayerUrl);
+  if (tDownload.href && tDownload.href.startsWith('blob:')) URL.revokeObjectURL(tDownload.href);
+  tFile = f;
+  tPlayerUrl = URL.createObjectURL(f);
+  tPlayer.src = tPlayerUrl;
+  tEditor.style.display = 'block';
+  tDrop.style.display = 'none';
+  tDownload.style.display = 'none';
+  tStatus.textContent = '';
+  loadFFmpeg().catch(() => {});
+}
+tPlayer.onloadedmetadata = () => {
+  tDuration = tPlayer.duration || 0;
+  for (const el of [tStartRange, tEndRange]) { el.max = tDuration.toFixed(1); }
+  for (const el of [tStartNum, tEndNum]) { el.max = tDuration.toFixed(1); }
+  tStartNum.value = '0.0'; tStartRange.value = 0;
+  tEndNum.value = tDuration.toFixed(1); tEndRange.value = tDuration.toFixed(1);
+  updateTrimReadout();
+};
+
+async function trimVideo() {
+  if (!tFile || tTrimming) return;
+  const start = clampT(tStartNum.value), end = clampT(tEndNum.value);
+  if (!(start < end)) { tStatus.textContent = 'Set a start time before the end time.'; return; }
+  try { await loadFFmpeg(); }
+  catch { tStatus.textContent = 'Engine not ready. Use Retry in the banner above.'; return; }
+  tTrimming = true; updateTrimReadout();
+  tProgressWrap.classList.add('show'); tProgressBar.style.width = '5%';
+  const fast = document.querySelector('input[name="tMode"]:checked').value === 'fast';
+  tStatus.textContent = fast ? 'Cutting at the nearest keyframes (instant)…' : 'Re-encoding precisely — this takes a while on long clips…';
+  let inName = '', outName = '';
+  try {
+    const safeBase = (tFile.name.replace(/\.[^.]+$/, '') || 'video').replace(/[^\w.-]/g, '_').slice(0, 60) || 'video';
+    const ext = ((tFile.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^\w]/g, '')) || 'mp4';
+    inName = `trim-in-${Date.now()}.${ext}`;
+    outName = fast ? `trimmed-${safeBase}.${ext}` : `trimmed-${safeBase}.mp4`;
+    await ffmpeg.writeFile(inName, await fetchFile(tFile));
+    const dur = (end - start).toFixed(3);
+    const sStr = start.toFixed(3);
+    const args = fast
+      ? ['-ss', sStr, '-i', inName, '-t', dur, '-c', 'copy', '-movflags', '+faststart', outName]
+      : ['-i', inName, '-ss', sStr, '-t', dur, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-c:a', 'aac', '-movflags', '+faststart', outName];
+    await ffmpeg.exec(args);
+    const data = await ffmpeg.readFile(outName);
+    if (!data || data.length < 1000) throw new Error('output too small');
+    const mime = MIME[fast ? ext : 'mp4'] || 'video/mp4';
+    if (tDownload.href && tDownload.href.startsWith('blob:')) URL.revokeObjectURL(tDownload.href);
+    tDownload.href = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
+    tDownload.download = outName;
+    tDownload.textContent = `⬇ Download ${outName} (${(data.length / 1048576).toFixed(1)} MB)`;
+    tDownload.style.display = 'inline-block';
+    tProgressBar.style.width = '100%';
+    tStatus.textContent = fast
+      ? '✅ Done — fast cut snaps to keyframes, so the start may land a second or two early.'
+      : '✅ Done — frame-exact trim, saved as MP4.';
+    setTimeout(() => { tProgressWrap.classList.remove('show'); tProgressBar.style.width = '0%'; }, 800);
+  } catch (e) {
+    console.error(e);
+    tStatus.textContent = 'Trim failed: ' + (e.message || 'try a smaller file or the other cut mode');
+    tProgressWrap.classList.remove('show');
+  } finally {
+    for (const n of [inName, outName]) if (n) { try { await ffmpeg?.deleteFile(n); } catch (_) {} }
+    tTrimming = false; updateTrimReadout();
+  }
+}
+tTrimBtn.onclick = trimVideo;
+document.getElementById('tNewBtn').onclick = () => {
+  tEditor.style.display = 'none';
+  tDrop.style.display = '';
+  tInput.value = '';
+  if (tPlayerUrl) { URL.revokeObjectURL(tPlayerUrl); tPlayerUrl = null; }
+  tPlayer.removeAttribute('src'); tPlayer.load();
+  tFile = null; tDuration = 0; tStatus.textContent = '';
+  updateTrimReadout();
+};
+setupDrop(tDrop, tInput, files => setTrimFile(files && files[0]));
+
 </script>
 
 <!-- =========================================================
