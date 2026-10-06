@@ -573,13 +573,14 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 .tTools { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-wrap: break-word; }
 
 /* Landing feature cards */
-.featCards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 20px; }
+.featCards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 20px; }
 .featCard { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; cursor: pointer; font-family: inherit; color: var(--text); transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
 .featCard:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 .featCard svg { width: 46px; height: 46px; color: var(--primary); flex: 0 0 auto; }
 .featCard b { font-size: 0.95rem; }
 .featCard span { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
-@media (max-width: 720px) { .featCards { grid-template-columns: 1fr; } }
+@media (max-width: 1080px) { .featCards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .featCards { grid-template-columns: 1fr; } }
 /* Converter workspace: preview card + tools panel */
 .vPrevCard { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
 .vPrevCard video { width: 100%; max-height: 420px; display: block; background: #000; }
@@ -711,6 +712,14 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                 </svg>
                 <b>Trim &amp; cut</b>
                 <span>Delete unwanted parts with the multi-cut timeline editor.</span>
+              </button>
+              <button type="button" class="featCard" data-feat="bleep">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M8 20v8h7l8 7V13l-8 7z" fill="currentColor" stroke="none"/>
+                  <path d="M30 18l12 12M42 18L30 30"/>
+                </svg>
+                <b>Bleep &amp; censor</b>
+                <span>Silence parts with a beep, mute, or your own custom sound.</span>
               </button>
             </div>
 
@@ -1215,8 +1224,8 @@ const vProgressWrap = document.getElementById('vProgressWrap');
 document.querySelectorAll('.featCard').forEach(c => {
   c.addEventListener('click', () => {
     const k = c.dataset.feat;
-    if (k === 'trim') {
-      const tb = document.querySelector('.tabBtn[data-tab="trim"]');
+    if (k === 'trim' || k === 'bleep') {
+      const tb = document.querySelector('.tabBtn[data-tab="' + k + '"]');
       if (tb) { tb.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
       return;
     }
