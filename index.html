@@ -360,13 +360,6 @@ input[type="color"] { padding: 2px; width: 44px; height: 38px; cursor: pointer; 
   color: var(--muted); font-size: 0.75rem; background: var(--card); min-height: 90px;
 }
 
-.vPreviewArea {
-  display: none;
-  margin-top: 8px;
-  animation: fadeUp 0.3s ease;
-}
-.vPreviewArea.show { display: block; }
-
 .fileThumb { cursor: pointer; }
 .fileThumb:hover { outline: 2px solid var(--primary); outline-offset: 2px; }
 
@@ -578,6 +571,29 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 .tEditGrid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,300px); gap: 16px; align-items: start; }
 .tEditGrid > * { min-width: 0; }
 .tTools { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-wrap: break-word; }
+
+/* Landing feature cards */
+.featCards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0 20px; }
+.featCard { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; cursor: pointer; font-family: inherit; color: var(--text); transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.featCard:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+.featCard svg { width: 46px; height: 46px; color: var(--primary); flex: 0 0 auto; }
+.featCard b { font-size: 0.95rem; }
+.featCard span { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+@media (max-width: 720px) { .featCards { grid-template-columns: 1fr; } }
+/* Converter workspace: preview card + tools panel */
+.vPrevCard { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+.vPrevCard video { width: 100%; max-height: 420px; display: block; background: #000; }
+.vAudioPh { display: flex; align-items: center; justify-content: center; font-size: 64px; min-height: 220px; background: var(--bg); }
+.vPrevMeta { padding: 10px 14px; font-size: 13px; color: var(--muted); background: var(--bg); border-top: 1px solid var(--border); overflow-wrap: break-word; }
+.chipRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.fChip { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 7px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: inherit; }
+.fChip:hover { border-color: var(--border-strong); }
+.fChip.active { outline: 2px solid #60a5fa; outline-offset: 1px; }
+.batchRow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.tField { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; font-weight: 600; }
+.tField select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 13px; max-width: 172px; font-family: inherit; }
+.tCheck { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 10px; cursor: pointer; }
+.tCheck input { width: 16px; height: 16px; accent-color: var(--primary); }
 #tDownload { white-space: normal; word-break: break-word; }
 @media (max-width: 860px) { .tEditGrid { grid-template-columns: 1fr; } }
 .tl { position: relative; height: 120px; border-radius: 12px; overflow: hidden; background: #0b1120; border: 1px solid var(--border); touch-action: none; user-select: none; -webkit-user-select: none; margin-bottom: 12px; cursor: crosshair; }
@@ -647,30 +663,40 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             </select>
           </div>
         -->
-          <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:12px;font-size:12px">
-            <span style="font-weight:600">Rotate:</span>
-            <select id="vRotate" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px">
-              <option value="0" selected>0°</option>
-              <option value="90">90° ↻</option>
-              <option value="180">180°</option>
-              <option value="270">270° ↺</option>
-            </select>
-            <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer"><input type="checkbox" id="vFlipH"> <span>↔ Flip H</span></label>
-            <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer"><input type="checkbox" id="vFlipV"> <span>↕ Flip V</span></label>
-            <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:8px;cursor:pointer"><input type="checkbox" id="removeAudioToggle"> <span>🔇 Remove audio</span></label>
-            <span style="font-weight:600">Quality:</span>
-            <select id="qualityMode" title="Smaller file converts faster with lower quality; High quality is slower with larger files." style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px">
-              <option value="small">📦 Smaller file</option>
-              <option value="balanced" selected>⚖️ Balanced</option>
-              <option value="high">🎬 High quality</option>
-            </select>
-          </div>
+          
           <div id="webcodecsStatus" style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:8px"></div>
           <div class="privacy-pills">
             <span class="pill">🔒 No upload</span>
             <span class="pill">Best under 500 MB</span>
             <span class="pill">Files stay on device</span>
           </div>
+<div class="featCards">
+              <button type="button" class="featCard" data-feat="convert">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="7" y="12" width="34" height="24" rx="6"/>
+                  <path d="M21 19.5l9 4.5-9 4.5z" fill="currentColor" stroke="none"/>
+                  <path d="M14 12V8M24 12V8M34 12V8M14 40v-4M24 40v-4M34 40v-4"/>
+                </svg>
+                <b>Convert video</b>
+                <span>MP4, MOV, WebM &amp; 20+ formats — entirely in your browser.</span>
+              </button>
+              <button type="button" class="featCard" data-feat="audio">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+                  <path d="M8 24v0M14 19v10M20 13v22M26 17v14M32 21v6M38 24v0"/>
+                </svg>
+                <b>Extract audio</b>
+                <span>Pull MP3 or WAV out of any video in one click.</span>
+              </button>
+              <button type="button" class="featCard" data-feat="trim">
+                <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="13" cy="13" r="4.5"/>
+                  <circle cx="13" cy="35" r="4.5"/>
+                  <path d="M17 16.5L38 33M17 31.5L38 15"/>
+                </svg>
+                <b>Trim &amp; cut</b>
+                <span>Delete unwanted parts with the multi-cut timeline editor.</span>
+              </button>
+            </div>
 
           <div id="engineBanner" class="engineBanner" role="status" aria-live="polite">
             <span id="engineTitle">Engine loads when you add a file</span>
@@ -687,8 +713,78 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             <input id="vInput" type="file" accept="video/*,audio/*" multiple hidden>
           </div>
 
-          <div id="vPreviewArea" class="vPreviewArea">
-            <div id="vList" style="display: flex; flex-direction: column; gap: 12px"></div>
+<div id="vWorkspace" style="display:none">
+            <div class="tEditGrid">
+              <div>
+                <div id="vFileChips" class="chipRow" style="display:none"></div>
+                <div class="vPrevCard">
+                  <video id="vPrevPlayer" controls playsinline preload="metadata"></video>
+                  <div id="vAudioPh" class="vAudioPh" style="display:none">🎵</div>
+                  <div id="vPrevMeta" class="vPrevMeta"></div>
+                </div>
+                <div class="batchRow">
+                  <button id="vAddMoreBtn" type="button" class="btn btn-ghost">＋ Add files</button>
+                  <button id="vConvertAllBtn" type="button" class="btn btn-blue" style="display:none">Convert all</button>
+                  <button id="vClearBtn" type="button" class="btn btn-ghost">Clear</button>
+                </div>
+              </div>
+              <aside class="tTools" aria-label="Conversion tools">
+                <div style="font-weight:700;margin-bottom:12px">⚙️ Convert</div>
+                <div class="tField"><span>Output format</span><select id="vOutSel" aria-label="Output format">
+          <optgroup label="🎬 Video">
+            <option value="mp4">MP4 - Universal</option>
+            <option value="mov">MOV - Apple QuickTime</option>
+            <option value="mkv">MKV - Matroska</option>
+            <option value="webm">WebM - Web</option>
+            <option value="avi">AVI - Old Windows</option>
+            <option value="flv">FLV - Flash</option>
+            <option value="wmv">WMV - Windows Media</option>
+            <option value="m4v">M4V - iTunes</option>
+            <option value="3gp">3GP - Mobile</option>
+            <option value="mpg">MPG - MPEG-1</option>
+            <option value="mpeg">MPEG - MPEG-2</option>
+            <option value="ts">TS - Transport Stream</option>
+            <option value="mts">MTS - AVCHD</option>
+            <option value="mxf">MXF - Broadcast</option>
+            <option value="gif">GIF - Animation</option>
+          </optgroup>
+          <optgroup label="🎵 Audio">
+            <option value="mp3">MP3 - Audio</option>
+            <option value="wav">WAV - Uncompressed (Instant ⚡)</option>
+            <option value="aac">AAC - Advanced Audio</option>
+            <option value="ogg">OGG - Vorbis</option>
+            <option value="flac">FLAC - Lossless</option>
+            <option value="m4a">M4A - Apple Audio</option>
+            <option value="wma">WMA - Windows Audio</option>
+            <option value="opus">OPUS - Low latency</option>
+            <option value="aiff">AIFF - Apple Lossless</option>
+            <option value="alac">ALAC - Apple Lossless</option>
+          </optgroup>
+        </select></select></div>
+                <div class="tField"><span>Rotate</span>
+                  <select id="vRotate" aria-label="Rotate video">
+                    <option value="0" selected>0°</option>
+                    <option value="90">90° ↻</option>
+                    <option value="180">180°</option>
+                    <option value="270">270° ↺</option>
+                  </select>
+                </div>
+                <div class="tField"><span>Quality</span>
+                  <select id="qualityMode" aria-label="Quality" title="Smaller file converts faster with lower quality; High quality is slower with larger files.">
+                    <option value="small">📦 Smaller file</option>
+                    <option value="balanced" selected>⚖️ Balanced</option>
+                    <option value="high">🎬 High quality</option>
+                  </select>
+                </div>
+                <label class="tCheck"><input type="checkbox" id="vFlipH"> ↔ Flip horizontally</label>
+                <label class="tCheck"><input type="checkbox" id="vFlipV"> ↕ Flip vertically</label>
+                <label class="tCheck"><input type="checkbox" id="removeAudioToggle"> 🔇 Remove audio</label>
+                <div style="display:grid;gap:8px;margin-top:12px">
+                  <button id="vConvertBtn" type="button" class="btn btn-blue">Convert</button>
+                  <a id="vDlLink" class="btn btn-green" style="display:none">⬇ Download</a>
+                </div>
+              </aside>
+            </div>
           </div>
 
           <div id="vStatus" class="status-line" aria-live="polite"></div>
@@ -975,7 +1071,10 @@ document.querySelectorAll('.tabBtn').forEach(b => {
     b.setAttribute('aria-selected', 'true');
     document.getElementById('videoTab').style.display = b.dataset.tab === 'video' ? 'block' : 'none';
     document.getElementById('trimTab').style.display = b.dataset.tab === 'trim' ? 'block' : 'none';
-    try { history.replaceState(null, '', b.dataset.tab === 'trim' ? '#trim' : location.pathname); } catch (_) {}
+    try {
+      if (b.dataset.tab === 'trim') history.replaceState(null, '', '#trim');
+      else if (location.hash === '#trim') history.replaceState(null, '', location.pathname + location.search);
+    } catch (_) {}
   };
 });
 
@@ -999,11 +1098,22 @@ let batchConverting = false;
 const MAX_BATCH_FILES = 10;
 const vDrop = document.getElementById('vDrop');
 const vInput = document.getElementById('vInput');
-const vList = document.getElementById('vList');
 const vStatus = document.getElementById('vStatus');
 const vProgressWrap = document.getElementById('vProgressWrap');
+// ——— Landing feature cards ———
+document.querySelectorAll('.featCard').forEach(c => {
+  c.addEventListener('click', () => {
+    const k = c.dataset.feat;
+    if (k === 'trim') {
+      const tb = document.querySelector('.tabBtn[data-tab="trim"]');
+      if (tb) { tb.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      return;
+    }
+    if (k === 'audio') { pendingOut = 'mp3'; vStatus.textContent = '🎵 Next file you add will extract audio as MP3.'; }
+    vDrop.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
 const vProgressBar = document.getElementById('vProgressBar');
-const vPreviewArea = document.getElementById('vPreviewArea');
 const engineBanner = document.getElementById('engineBanner');
 const engineTitle = document.getElementById('engineTitle');
 const engineDesc = document.getElementById('engineDesc');
@@ -1273,6 +1383,7 @@ function addVFiles(list) {
   if (skipped) msgs.push(`${skipped} skipped (limit ${MAX_BATCH_FILES} files, 1 GB each)`);
   const large = vFiles.some(f => f.file.size > MAX_RECOMMENDED_BYTES);
   vStatus.textContent = msgs.join('. ') + (large ? '. Large file warning: this may use significant memory and take longer on this device.' : '');
+  if (added) vSelectedId = vFiles[vFiles.length - 1].id;
   loadFFmpeg().catch(() => {});
   renderV();
 }
@@ -1299,95 +1410,109 @@ function fmtSize(bytes){
   return (bytes/1073741824).toFixed(2) + ' GB';
 }
 
-function renderV() {
-  vList.innerHTML = '';
-  if (!vFiles.length) { vDrop.classList.remove('hidden'); vPreviewArea.classList.remove('show'); return; }
-  vDrop.classList.add('hidden');
-  vPreviewArea.classList.add('show');
-  // batch toolbar
-  const busy = vFiles.some(f => f.status === 'converting');
-  const readyCount = vFiles.filter(f => f.status === 'ready').length;
-  const bar = document.createElement('div');
-  bar.className = 'batchBar';
-  bar.innerHTML = `
-    <span><b>${vFiles.length}</b> file${vFiles.length === 1 ? '' : 's'}</span>
-    <span style="flex:1"></span>
-    <button type="button" class="btn btn-ghost" id="vAddMore">＋ Add files</button>
-    ${vFiles.length > 1 ? `<button type="button" class="btn btn-blue" id="vConvertAll" ${(!readyCount || busy || batchConverting) ? 'disabled' : ''}>Convert all (${readyCount})</button>` : ''}
-    <button type="button" class="btn btn-ghost" id="vClearAll" ${busy || batchConverting ? 'disabled' : ''}>Clear</button>`;
-  vList.appendChild(bar);
-  document.getElementById('vAddMore').onclick = () => { vInput.value = ''; vInput.click(); };
-  document.getElementById('vClearAll').onclick = () => {
-    for (const it of vFiles) { if (it.previewUrl) URL.revokeObjectURL(it.previewUrl); if (it.downloadUrl) URL.revokeObjectURL(it.downloadUrl); }
-    vFiles.length = 0; renderV();
-  };
-  const callBtn = document.getElementById('vConvertAll');
-  if (callBtn) callBtn.onclick = convertAllV;
-  for (const item of vFiles) {
-  const div = document.createElement('div');
-  div.className = 'fileCard';
-  const statusClass = `status-${item.status}`;
-  const inSize = fmtSize(item.file.size);
-  const sizeHtml = (item.status === 'done' && item.outSize) ? `${inSize} → <b>${fmtSize(item.outSize)}</b>` : inSize;
-  const thumbHtml = item.isAudio
-    ? '<div class="fileThumb audio" aria-hidden="true" title="Audio file">🎵</div>'
-    : `<video class="fileThumb" src="${item.previewUrl}" muted playsinline preload="metadata" data-preview="${item.previewUrl}" data-name="${escapeHtml(item.file.name)}" title="Click to play preview"></video>`;
-  const downloadVisible = item.status === 'done' && item.downloadUrl;
-  const skipsEngine = item.out === 'wav';
-  const canConvert = (loaded || skipsEngine) && item.status !== 'converting';
-  const convLabel = item.status === 'converting' ? '<span class="spinner"></span> Converting…' : ((!loaded && !skipsEngine) ? 'Preparing engine…' : 'Convert');
-  div.innerHTML = `
-    ${thumbHtml}
-    <div class="fileMeta"><b>${escapeHtml(item.file.name)}</b><div class="meta"><span>${sizeHtml}</span><span class="status-pill ${statusClass}">${item.status}</span>${!item.isAudio ? '<span style="font-size:11px;color:var(--primary)">Click preview to play</span>' : ''}</div></div>
-    <div class="fileActions">
-      <select data-id="${item.id}" class="vOut" style="min-width:140px">
-          <optgroup label="🎬 Video">
-            <option value="mp4" ${item.out==='mp4'?'selected':''}>MP4 - Universal</option>
-            <option value="mov" ${item.out==='mov'?'selected':''}>MOV - Apple QuickTime</option>
-            <option value="mkv" ${item.out==='mkv'?'selected':''}>MKV - Matroska</option>
-            <option value="webm" ${item.out==='webm'?'selected':''}>WebM - Web</option>
-            <option value="avi" ${item.out==='avi'?'selected':''}>AVI - Old Windows</option>
-            <option value="flv" ${item.out==='flv'?'selected':''}>FLV - Flash</option>
-            <option value="wmv" ${item.out==='wmv'?'selected':''}>WMV - Windows Media</option>
-            <option value="m4v" ${item.out==='m4v'?'selected':''}>M4V - iTunes</option>
-            <option value="3gp" ${item.out==='3gp'?'selected':''}>3GP - Mobile</option>
-            <option value="mpg" ${item.out==='mpg'?'selected':''}>MPG - MPEG-1</option>
-            <option value="mpeg" ${item.out==='mpeg'?'selected':''}>MPEG - MPEG-2</option>
-            <option value="ts" ${item.out==='ts'?'selected':''}>TS - Transport Stream</option>
-            <option value="mts" ${item.out==='mts'?'selected':''}>MTS - AVCHD</option>
-            <option value="mxf" ${item.out==='mxf'?'selected':''}>MXF - Broadcast</option>
-            <option value="gif" ${item.out==='gif'?'selected':''}>GIF - Animation</option>
-          </optgroup>
-          <optgroup label="🎵 Audio">
-            <option value="mp3" ${item.out==='mp3'?'selected':''}>MP3 - Audio</option>
-            <option value="wav" ${item.out==='wav'?'selected':''}>WAV - Uncompressed (Instant ⚡)</option>
-            <option value="aac" ${item.out==='aac'?'selected':''}>AAC - Advanced Audio</option>
-            <option value="ogg" ${item.out==='ogg'?'selected':''}>OGG - Vorbis</option>
-            <option value="flac" ${item.out==='flac'?'selected':''}>FLAC - Lossless</option>
-            <option value="m4a" ${item.out==='m4a'?'selected':''}>M4A - Apple Audio</option>
-            <option value="wma" ${item.out==='wma'?'selected':''}>WMA - Windows Audio</option>
-            <option value="opus" ${item.out==='opus'?'selected':''}>OPUS - Low latency</option>
-            <option value="aiff" ${item.out==='aiff'?'selected':''}>AIFF - Apple Lossless</option>
-            <option value="alac" ${item.out==='alac'?'selected':''}>ALAC - Apple Lossless</option>
-          </optgroup>
-        </select>
-      <button data-id="${item.id}" class="vConv btn btn-blue" ${canConvert ? '' : 'disabled'}>${convLabel}</button>
-      <a id="vdl-${item.id}" class="btn btn-green" style="display:${downloadVisible ? 'inline-flex' : 'none'}" download>⬇️ Download</a>
-      <button data-id="${item.id}" class="vRemove btn btn-ghost" aria-label="Remove file" ${item.status === 'converting' ? 'disabled' : ''}>✕ Remove</button>
-    </div>`;
-  vList.appendChild(div);
-  if (downloadVisible) { const a = document.getElementById(`vdl-${item.id}`); if (a) { a.href = item.downloadUrl; a.download = item.downloadName || `converted.${item.out}`; } }
-  div.querySelector('.vOut').onchange = e => { item.out = e.target.value; item.status = 'ready'; item.outSize = 0; renderV(); };
-  div.querySelector('.vConv').onclick = e => {
-    const it = vFiles.find(f => f.id === e.currentTarget.dataset.id);
-    if (loaded || it?.out === 'wav') convertV(e.currentTarget.dataset.id);
-  };
-  div.querySelector('.vRemove').onclick = e => removeVFile(e.currentTarget.dataset.id);
-  const preview = div.querySelector('.fileThumb[data-preview]');
-  if (preview) preview.onclick = () => { playerVideo.src = preview.dataset.preview; playerName.textContent = preview.dataset.name || 'Preview'; playerModal.classList.add('show'); playerVideo.play().catch(() => {}); };
-  } // end for (const item of vFiles)
-  setTimeout(updateVPreviewTransform, 50);
+// ——— Converter workspace: preview card + tools panel ———
+let vSelectedId = null;
+const vWorkspace = document.getElementById('vWorkspace');
+const vFileChips = document.getElementById('vFileChips');
+const vPrevPlayer = document.getElementById('vPrevPlayer');
+const vAudioPh = document.getElementById('vAudioPh');
+const vPrevMeta = document.getElementById('vPrevMeta');
+const vAddMoreBtn = document.getElementById('vAddMoreBtn');
+const vConvertAllBtn = document.getElementById('vConvertAllBtn');
+const vClearBtn = document.getElementById('vClearBtn');
+const vOutSel = document.getElementById('vOutSel');
+const vConvertBtn = document.getElementById('vConvertBtn');
+const vDlLink = document.getElementById('vDlLink');
+
+function vSelected() { return vFiles.find(f => f.id === vSelectedId) || vFiles[0] || null; }
+
+function selectVFileByFile(f) {
+  const it = vFiles.find(x => x.file.name === f.name && x.file.size === f.size && x.file.lastModified === f.lastModified);
+  if (it) vSelectedId = it.id;
 }
+
+function clearVFiles() {
+  if (vFiles.some(f => f.status === 'converting') || batchConverting) return;
+  for (const it of vFiles) { if (it.previewUrl) URL.revokeObjectURL(it.previewUrl); if (it.downloadUrl) URL.revokeObjectURL(it.downloadUrl); }
+  vFiles.length = 0; vSelectedId = null;
+  renderV();
+}
+
+function renderV() {
+  const has = vFiles.length > 0;
+  vDrop.classList.toggle('hidden', has);
+  vWorkspace.style.display = has ? 'block' : 'none';
+  if (!has) { vSelectedId = null; shareToTrimmer(null); return; }
+  if (!vFiles.some(f => f.id === vSelectedId)) vSelectedId = vFiles[0].id;
+  const item = vSelected();
+  renderVChips(item);
+  renderVWork(item);
+  shareToTrimmer(item);
+}
+
+function renderVChips(item) {
+  vFileChips.style.display = vFiles.length > 1 ? 'flex' : 'none';
+  vFileChips.innerHTML = '';
+  for (const f of vFiles) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'fChip' + (f.id === item.id ? ' active' : '');
+    b.textContent = (f.isAudio ? '🎵 ' : '🎬 ') + f.file.name;
+    b.title = f.file.name;
+    b.onclick = () => { vSelectedId = f.id; renderV(); };
+    vFileChips.appendChild(b);
+  }
+  const busy = vFiles.some(f => f.status === 'converting') || batchConverting;
+  vAddMoreBtn.onclick = () => { vInput.value = ''; vInput.click(); };
+  vClearBtn.onclick = clearVFiles;
+  vClearBtn.disabled = busy;
+  const readyCount = vFiles.filter(f => f.status === 'ready').length;
+  vConvertAllBtn.style.display = vFiles.length > 1 ? '' : 'none';
+  vConvertAllBtn.disabled = !readyCount || busy;
+  vConvertAllBtn.textContent = `Convert all (${readyCount})`;
+  vConvertAllBtn.onclick = () => { if (!vConvertAllBtn.disabled) convertAllV(); };
+}
+
+function renderVWork(item) {
+  if (item.isAudio) {
+    vPrevPlayer.style.display = 'none';
+    vPrevPlayer.removeAttribute('src');
+    vPrevPlayer.dataset.fid = '';
+    vAudioPh.style.display = 'flex';
+  } else {
+    vAudioPh.style.display = 'none';
+    vPrevPlayer.style.display = 'block';
+    if (vPrevPlayer.dataset.fid !== item.id) {
+      vPrevPlayer.src = item.previewUrl;
+      vPrevPlayer.dataset.fid = item.id;
+    }
+  }
+  vPrevMeta.innerHTML = `<b>${escapeHtml(item.file.name)}</b> &nbsp;·&nbsp; ${fmtSize(item.file.size)} &nbsp;·&nbsp; <span class="status-pill status-${item.status}">${item.status}</span>`;
+  if (vOutSel.value !== item.out) vOutSel.value = item.out;
+  const busy = item.status === 'converting' || batchConverting;
+  const canConvert = (loaded || item.out === 'wav') && !busy;
+  vConvertBtn.disabled = !canConvert;
+  vConvertBtn.innerHTML = item.status === 'converting' ? '<span class="spinner"></span> Converting…' : ((!loaded && item.out !== 'wav') ? 'Preparing engine…' : 'Convert');
+  if (item.status === 'done' && item.downloadUrl) {
+    vDlLink.style.display = 'inline-flex';
+    vDlLink.href = item.downloadUrl;
+    vDlLink.download = item.downloadName || `converted.${item.out}`;
+    vDlLink.textContent = `⬇ Download (${fmtSize(item.outSize)})`;
+  } else {
+    vDlLink.style.display = 'none';
+  }
+  updateVPreviewTransform();
+}
+
+vOutSel.onchange = () => {
+  const item = vSelected(); if (!item) return;
+  item.out = vOutSel.value; item.status = 'ready'; item.outSize = 0;
+  renderV();
+};
+vConvertBtn.onclick = () => {
+  const item = vSelected(); if (!item || vConvertBtn.disabled) return;
+  if (loaded || item.out === 'wav') convertV(item.id);
+};
 
 document.getElementById('playerClose').onclick = closePlayer;
 playerModal.onclick = e => { if (e.target === playerModal) closePlayer(); };
@@ -1397,23 +1522,12 @@ function updateVPreviewTransform(){
   const rot = document.getElementById('vRotate')?.value || '0';
   const fh = document.getElementById('vFlipH')?.checked;
   const fv = document.getElementById('vFlipV')?.checked;
-  const thumbs = document.querySelectorAll('.fileThumb');
-  thumbs.forEach(th => {
-    let transforms = [];
-    if (fh) transforms.push('scaleX(-1)');
-    if (fv) transforms.push('scaleY(-1)');
-    if (rot !== '0') transforms.push(`rotate(${rot}deg)`);
-    th.style.transform = transforms.join(' ');
-    th.style.transition = 'transform 0.25s ease';
-  });
-  const modalVid = document.getElementById('playerVideo');
-  if (modalVid){
-    let mT = [];
-    if (fh) mT.push('scaleX(-1)');
-    if (fv) mT.push('scaleY(-1)');
-    if (rot !== '0') mT.push(`rotate(${rot}deg)`);
-    modalVid.style.transform = mT.join(' ');
-  }
+  const t = [];
+  if (fh) t.push('scaleX(-1)');
+  if (fv) t.push('scaleY(-1)');
+  if (rot !== '0') t.push(`rotate(${rot}deg)`);
+  const p = document.getElementById('vPrevPlayer');
+  if (p) { p.style.transform = t.join(' '); p.style.transition = 'transform 0.25s ease'; }
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && playerModal.classList.contains('show')) closePlayer(); });
 function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
@@ -2097,7 +2211,20 @@ async function saveVideo() {
 tDeleteBtn.onclick = deleteSelection;
 tSaveBtn.onclick = saveVideo;
 
-document.getElementById('tNewBtn').onclick = () => {
+
+// ——— Shared video between converter and trim tabs ———
+// The trimmer always mirrors the converter's selected video file.
+// Loading a video in either tab makes it available in the other;
+// picking another file replaces it everywhere.
+function shareToTrimmer(item) {
+  if (!window.__trimReady) return; // trimmer section not parsed yet
+  const f = (item && !item.isAudio) ? item.file : null;
+  if (f && tFile === f) return;     // already showing this file
+  if (!f && !tFile) return;         // nothing to clear
+  if (f) setTrimFile(f); else clearTrimFile();
+}
+
+function clearTrimFile() {
   tEditor.style.display = 'none';
   tDrop.style.display = '';
   tInput.value = '';
@@ -2108,8 +2235,23 @@ document.getElementById('tNewBtn').onclick = () => {
   tFile = null; tDuration = 0; tStatus.textContent = '';
   tCuts = []; renderCuts();
   updateTrimReadout();
-};
-setupDrop(tDrop, tInput, files => setTrimFile(files && files[0]));
+}
+
+// Trimmer's dropzone / file picker feed into the converter's file list
+// and select the new file, so both tabs share it.
+function trimmerPick(files) {
+  const f = files && files[0];
+  tInput.value = '';
+  if (!f) return;
+  if (!f.type.startsWith('video/')) { tStatus.textContent = 'Please choose a video file — the trimmer works on video only.'; return; }
+  addVFiles([f]);
+  selectVFileByFile(f);
+  renderV();
+}
+
+document.getElementById('tNewBtn').onclick = () => { tInput.value = ''; tInput.click(); };
+setupDrop(tDrop, tInput, trimmerPick);
+window.__trimReady = true;
 
 </script>
 
