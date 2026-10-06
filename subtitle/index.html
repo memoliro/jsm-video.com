@@ -173,6 +173,14 @@ footer{background:var(--card);border-top:1px solid var(--border);margin-top:56px
 .footer-links{display:flex;gap:20px;flex-wrap:wrap}
 .footer-links a{color:var(--muted);font-weight:500}
 .footer-links a:hover{color:var(--text)}
+.footer-more{align-items:center;font-size:.8125rem}
+.footer-more span{color:var(--muted);font-weight:600}
+/* --- Support the site --- */
+.support-section{text-align:center;max-width:620px;margin:40px auto 0;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px}
+.support-section h2{font-weight:700;font-size:1rem;margin:0 0 4px}
+.support-section p{color:var(--muted);margin:6px 0 18px}
+.bmc-btn{display:inline-flex;align-items:center;gap:8px;background:#FFDD00;color:#000!important;font-weight:700;padding:12px 24px;border-radius:999px;text-decoration:none;transition:transform .15s ease,box-shadow .15s ease}
+.bmc-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.15)}
 /* subtitle specific */
 .tool-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;border:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
 .tool-tab{padding:8px 14px;border-radius:8px;border:0;background:transparent;color:var(--muted);font-weight:700;font-size:0.8125rem;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
@@ -417,15 +425,32 @@ footer{background:var(--card);border-top:1px solid var(--border);margin-top:56px
   </main>
 </div>
 
+      <section class="support-section">
+        <h2>Support the site</h2>
+        <p>JSM-Video.com stays free. If it helps, you can buy a coffee.</p>
+        <a class="bmc-btn" href="https://www.buymeacoffee.com/memoliro" target="_blank" rel="noopener">&#9749; Buy me a coffee</a>
+      </section>
+
 <footer>
-  <div class="wrap footer-inner">
-    <div>© 2026 JSM-Video.com — Free tools, 100% private.</a></div>
-    <div class="footer-links">
-      <a href="/">Video Converter</a>
-      <a href="/subtitle/">Subtitle Toolkit</a>
-      <a href="/about.html">About</a>
-      <a href="/privacy-policy.html">Privacy</a>
-      <a href="#" id="cookieSettingsBtn">Cookie Settings</a>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
+      <div class="footer-links">
+        <a href="/">Converter</a>
+        <a href="/#articles">Articles</a>
+        <a href="/about.html">About</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+        <a href="#" id="cookieSettingsBtn">Cookie Settings</a>
+      </div>
+      <div class="footer-links footer-more">
+        <span>More free tools:</span>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
+      </div>
     </div>
   </div>
 </footer>
