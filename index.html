@@ -2327,6 +2327,10 @@ async function restoreVFiles() {
     if (sel && vFiles.some(f => f.id === sel)) vSelectedId = sel;
   } catch (_) {}
   renderV();
+  // The engine-ready handler clears vStatus when loadFFmpeg() finishes (triggered
+  // via shareToTrimmer above), so wait for it before announcing the restore.
+  try { await loadFFmpeg(); } catch (_) {}
+  if (!vFiles.length || vStatus.textContent) return;
   vStatus.textContent = `Restored ${vFiles.length} file${vFiles.length === 1 ? '' : 's'} from your last visit — Clear removes ${vFiles.length === 1 ? 'it' : 'them'}.`;
 }
 
