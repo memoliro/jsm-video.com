@@ -1742,11 +1742,12 @@ tPlayer.onloadedmetadata = () => {
 
 async function trimVideo() {
   if (!tFile || tTrimming) return;
+  if (typeof vActiveExec !== 'undefined' && vActiveExec) { tStatus.textContent = 'A conversion is still running — please wait for it to finish, then trim.'; return; }
   const start = clampT(tStartNum.value), end = clampT(tEndNum.value);
   if (!(start < end)) { tStatus.textContent = 'Set a start time before the end time.'; return; }
   try { await loadFFmpeg(); }
   catch { tStatus.textContent = 'Engine not ready. Use Retry in the banner above.'; return; }
-  tTrimming = true; vActiveExec = true; updateTrimReadout();
+  tTrimming = true; updateTrimReadout();
   tProgressWrap.classList.add('show'); tProgressBar.style.width = '5%';
   const fast = document.querySelector('input[name="tMode"]:checked').value === 'fast';
   tStatus.textContent = fast ? 'Cutting at the nearest keyframes (instant)…' : 'Re-encoding precisely — this takes a while on long clips…';
@@ -1783,7 +1784,7 @@ async function trimVideo() {
     tProgressWrap.classList.remove('show');
   } finally {
     for (const n of [inName, outName]) if (n) { try { await ffmpeg?.deleteFile(n); } catch (_) {} }
-    tTrimming = false; vActiveExec = false; updateTrimReadout();
+    tTrimming = false; updateTrimReadout();
   }
 }
 tTrimBtn.onclick = trimVideo;
