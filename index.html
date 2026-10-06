@@ -572,6 +572,9 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 @media(max-width:720px){.logo{width:44px;height:44px;font-size:19px;border-radius:12px} .brand{font-size:1.05rem}}
 
 /* ——— Trim timeline (CapCut-style filmstrip) ——— */
+.tEditGrid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 16px; align-items: start; }
+.tTools { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+@media (max-width: 860px) { .tEditGrid { grid-template-columns: 1fr; } }
 .tl { position: relative; height: 120px; border-radius: 12px; overflow: hidden; background: #0b1120; border: 1px solid var(--border); touch-action: none; user-select: none; -webkit-user-select: none; margin-bottom: 12px; cursor: crosshair; }
 .tl-strip { position: absolute; inset: 0; display: flex; }
 .tl-strip img { flex: 1 1 0; min-width: 0; height: 100%; object-fit: cover; pointer-events: none; }
@@ -746,58 +749,66 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
           </div>
 
           <div id="tEditor" style="display:none">
-            <div style="margin-bottom:12px">
-              <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
-            </div>
-            <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
+            <div class="tEditGrid">
+              <div>
+                <div style="margin-bottom:12px">
+                  <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
+                </div>
+                <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
 
-            <div id="tTimeline" class="tl" aria-label="Video timeline — drag the blue handles to set trim start and end">
-              <div id="tStrip" class="tl-strip"></div>
-              <div id="tDimL" class="tl-dim"></div>
-              <div id="tDimR" class="tl-dim"></div>
-              <div id="tSelBox" class="tl-selbox"></div>
-              <div id="tCutsLayer" class="tl-cuts"></div>
-              <div id="tPlayhead" class="tl-playhead" style="display:none"></div>
-              <div id="tHandleS" class="tl-handle" role="slider" tabindex="0" aria-label="Trim start handle"></div>
-              <div id="tHandleE" class="tl-handle" role="slider" tabindex="0" aria-label="Trim end handle"></div>
-            </div>
-            <div id="tCutsRow" style="display:none;margin-bottom:12px">
-              <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Removed parts — tap ✕ to restore:</div>
-              <div id="tCutsChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-            </div>
-            <div style="display:grid;gap:10px;margin-bottom:14px">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                <label for="tStartNum" style="font-weight:600;font-size:13px">Start</label>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <input id="tStartNum" type="number" min="0" step="0.1" value="0" aria-label="Start time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
-                  <span style="font-size:12px;color:var(--muted)">sec</span>
-                  <button id="tStartNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set start to the player's current time">⏱ now</button>
+                <div id="tTimeline" class="tl" aria-label="Video timeline — drag the blue handles to set trim start and end">
+                  <div id="tStrip" class="tl-strip"></div>
+                  <div id="tDimL" class="tl-dim"></div>
+                  <div id="tDimR" class="tl-dim"></div>
+                  <div id="tSelBox" class="tl-selbox"></div>
+                  <div id="tCutsLayer" class="tl-cuts"></div>
+                  <div id="tPlayhead" class="tl-playhead" style="display:none"></div>
+                  <div id="tHandleS" class="tl-handle" role="slider" tabindex="0" aria-label="Trim start handle"></div>
+                  <div id="tHandleE" class="tl-handle" role="slider" tabindex="0" aria-label="Trim end handle"></div>
+                </div>
+                <div id="tCutsRow" style="display:none;margin-bottom:12px">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Removed parts — tap ✕ to restore:</div>
+                  <div id="tCutsChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
                 </div>
               </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-                <label for="tEndNum" style="font-weight:600;font-size:13px">End</label>
-                <div style="display:flex;gap:6px;align-items:center">
-                  <input id="tEndNum" type="number" min="0" step="0.1" value="0" aria-label="End time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
-                  <span style="font-size:12px;color:var(--muted)">sec</span>
-                  <button id="tEndNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set end to the player's current time">⏱ now</button>
+              <aside class="tTools" aria-label="Trim tools">
+                <div style="font-weight:700;margin-bottom:12px">✂️ Edit tools</div>
+                <div style="display:grid;gap:10px;margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                    <label for="tStartNum" style="font-weight:600;font-size:13px">Start</label>
+                    <div style="display:flex;gap:6px;align-items:center">
+                      <input id="tStartNum" type="number" min="0" step="0.1" value="0" aria-label="Start time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                      <span style="font-size:12px;color:var(--muted)">sec</span>
+                      <button id="tStartNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set start to the player's current time">⏱ now</button>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                    <label for="tEndNum" style="font-weight:600;font-size:13px">End</label>
+                    <div style="display:flex;gap:6px;align-items:center">
+                      <input id="tEndNum" type="number" min="0" step="0.1" value="0" aria-label="End time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                      <span style="font-size:12px;color:var(--muted)">sec</span>
+                      <button id="tEndNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set end to the player's current time">⏱ now</button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px" role="radiogroup" aria-label="Trim mode">
-              <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="fast" checked> <span>⚡ Fast cut</span></label>
-              <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="precise"> <span>🎯 Precise cut</span></label>
-            </div>
-            <p style="font-size:12px;color:var(--muted);margin:0 0 14px">Drag the handles (or type times) to select a part, then <b>Delete</b> removes it — repeat for as many parts as you like, then <b>Save</b> renders the video without them. Fast cut is instant but snaps to keyframes; Precise cut re-encodes for frame-exact results (slower, always MP4).</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px" role="radiogroup" aria-label="Trim mode">
+                  <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="fast" checked> <span>⚡ Fast cut</span></label>
+                  <label style="display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px"><input type="radio" name="tMode" value="precise"> <span>🎯 Precise cut</span></label>
+                </div>
+                <p style="font-size:12px;color:var(--muted);margin:0 0 14px">Select a part and press <b>Delete</b> — it's removed from the preview instantly (press play: removed parts are skipped). Repeat for more parts, then <b>Save</b>. Fast cut is instant but snaps to keyframes; Precise cut re-encodes frame-exact (slower, always MP4).</p>
 
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <button id="tDeleteBtn" class="btn btn-blue">🗑️ Delete selection</button>
-              <button id="tSaveBtn" class="btn btn-green">💾 Save video</button>
-              <button id="tNewBtn" class="btn btn-ghost">Choose another file</button>
-              <a id="tDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+                <div style="display:grid;gap:8px">
+                  <button id="tDeleteBtn" class="btn btn-blue">🗑️ Delete selection</button>
+                  <button id="tSaveBtn" class="btn btn-green">💾 Save video</button>
+                  <button id="tNewBtn" class="btn btn-ghost">Choose another file</button>
+                  <a id="tDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+                </div>
+                <div id="tStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
+              </aside>
             </div>
-            <div id="tStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
           </div>
+
         </div>
       </div>
 
@@ -1786,6 +1797,15 @@ function updateTimeline() {
 }
 function updatePlayhead() {
   if (!tTimeline || tDuration <= 0 || !tPlayer.duration) { tPlayhead.style.display = 'none'; return; }
+  const t = tPlayer.currentTime;
+  // Interactive preview: while playing, skip over removed parts so the
+  // preview shows what the saved video will look like. (When paused,
+  // scrubbing can still inspect any frame, including removed parts.)
+  if (!tPlayer.paused) {
+    for (const c of tCuts) {
+      if (t >= c.s && t < c.e - 0.001) { tPlayer.currentTime = Math.min(c.e, tDuration); return; }
+    }
+  }
   tPlayhead.style.display = 'block';
   tPlayhead.style.left = Math.min(100, (tPlayer.currentTime / tDuration) * 100) + '%';
 }
