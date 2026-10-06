@@ -1068,9 +1068,11 @@ async function loadCoreFrom() {
         const pct = Math.min(99, Math.round(progress * 100));
         const converting = (typeof vActiveExec !== 'undefined' && vActiveExec);
         const trimming = (typeof tTrimming !== 'undefined' && tTrimming);
-        if (converting) vStatus.textContent = `Converting ${pct}%…`;
-        vProgressBar.style.width = pct + '%';
-        vProgressWrap.classList.add('show');
+        if (converting) {
+          vStatus.textContent = `Converting ${pct}%…`;
+          vProgressBar.style.width = pct + '%';
+          vProgressWrap.classList.add('show');
+        }
         if (trimming) {
           const tPB = document.getElementById('tProgressBar');
           const tPW = document.getElementById('tProgressWrap');
@@ -1114,9 +1116,11 @@ async function loadFFmpeg(forceFresh = false) {
         const pct = Math.min(99, Math.round(progress * 100));
         const converting = (typeof vActiveExec !== 'undefined' && vActiveExec);
         const trimming = (typeof tTrimming !== 'undefined' && tTrimming);
-        if (converting) vStatus.textContent = `Converting ${pct}%…`;
-        vProgressBar.style.width = pct + '%';
-        vProgressWrap.classList.add('show');
+        if (converting) {
+          vStatus.textContent = `Converting ${pct}%…`;
+          vProgressBar.style.width = pct + '%';
+          vProgressWrap.classList.add('show');
+        }
         if (trimming) {
           const tPB = document.getElementById('tProgressBar');
           const tPW = document.getElementById('tProgressWrap');
