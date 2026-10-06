@@ -570,6 +570,18 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .logo{width:52px;height:52px;font-size:22px;border-radius:14px}
 @media(max-width:720px){.logo{width:44px;height:44px;font-size:19px;border-radius:12px} .brand{font-size:1.05rem}}
+
+/* ——— Trim timeline (CapCut-style filmstrip) ——— */
+.tl { position: relative; height: 76px; border-radius: 12px; overflow: hidden; background: #0b1120; border: 1px solid var(--border); touch-action: none; user-select: none; -webkit-user-select: none; margin-bottom: 12px; cursor: crosshair; }
+.tl-strip { position: absolute; inset: 0; display: flex; }
+.tl-strip img { flex: 1 1 0; min-width: 0; height: 100%; object-fit: cover; pointer-events: none; }
+.tl-dim { position: absolute; top: 0; bottom: 0; background: rgba(2,6,16,.62); pointer-events: none; }
+.tl-selbox { position: absolute; top: 0; bottom: 0; border-top: 2px solid #60a5fa; border-bottom: 2px solid #60a5fa; pointer-events: none; box-sizing: border-box; }
+.tl-handle { position: absolute; top: 0; bottom: 0; width: 18px; margin-left: -9px; background: #60a5fa; border-radius: 5px; cursor: ew-resize; touch-action: none; display: flex; align-items: center; justify-content: center; z-index: 3; }
+.tl-handle::after { content: ''; width: 4px; height: 22px; border-left: 2px solid rgba(255,255,255,.85); border-right: 2px solid rgba(255,255,255,.85); }
+.tl-handle:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.tl-playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 6px rgba(0,0,0,.6); pointer-events: none; z-index: 2; }
+.tl-playhead::before { content: ''; position: absolute; top: -1px; left: -5px; border: 6px solid transparent; border-top: 8px solid #fff; }
 </style>
 </head>
 <body>
@@ -737,28 +749,31 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             </div>
             <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
 
-            <div style="display:grid;gap:14px;margin-bottom:14px">
-              <div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px">
-                  <label for="tStartRange" style="font-weight:600;font-size:13px">Start</label>
-                  <div style="display:flex;gap:6px;align-items:center">
-                    <input id="tStartNum" type="number" min="0" step="0.1" value="0" aria-label="Start time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
-                    <span style="font-size:12px;color:var(--muted)">sec</span>
-                    <button id="tStartNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set start to the player's current time">⏱ now</button>
-                  </div>
+            <div id="tTimeline" class="tl" aria-label="Video timeline — drag the blue handles to set trim start and end">
+              <div id="tStrip" class="tl-strip"></div>
+              <div id="tDimL" class="tl-dim"></div>
+              <div id="tDimR" class="tl-dim"></div>
+              <div id="tSelBox" class="tl-selbox"></div>
+              <div id="tPlayhead" class="tl-playhead" style="display:none"></div>
+              <div id="tHandleS" class="tl-handle" role="slider" tabindex="0" aria-label="Trim start handle"></div>
+              <div id="tHandleE" class="tl-handle" role="slider" tabindex="0" aria-label="Trim end handle"></div>
+            </div>
+            <div style="display:grid;gap:10px;margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <label for="tStartNum" style="font-weight:600;font-size:13px">Start</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input id="tStartNum" type="number" min="0" step="0.1" value="0" aria-label="Start time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                  <span style="font-size:12px;color:var(--muted)">sec</span>
+                  <button id="tStartNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set start to the player's current time">⏱ now</button>
                 </div>
-                <input id="tStartRange" type="range" min="0" max="100" step="0.1" value="0" style="width:100%" aria-label="Start time slider">
               </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px">
-                  <label for="tEndRange" style="font-weight:600;font-size:13px">End</label>
-                  <div style="display:flex;gap:6px;align-items:center">
-                    <input id="tEndNum" type="number" min="0" step="0.1" value="0" aria-label="End time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
-                    <span style="font-size:12px;color:var(--muted)">sec</span>
-                    <button id="tEndNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set end to the player's current time">⏱ now</button>
-                  </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <label for="tEndNum" style="font-weight:600;font-size:13px">End</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input id="tEndNum" type="number" min="0" step="0.1" value="0" aria-label="End time in seconds" style="width:84px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px">
+                  <span style="font-size:12px;color:var(--muted)">sec</span>
+                  <button id="tEndNow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px" title="Set end to the player's current time">⏱ now</button>
                 </div>
-                <input id="tEndRange" type="range" min="0" max="100" step="0.1" value="0" style="width:100%" aria-label="End time slider">
               </div>
             </div>
 
@@ -1687,10 +1702,16 @@ const tDrop = document.getElementById('tDrop');
 const tInput = document.getElementById('tInput');
 const tEditor = document.getElementById('tEditor');
 const tPlayer = document.getElementById('tPlayer');
-const tStartRange = document.getElementById('tStartRange');
 const tStartNum = document.getElementById('tStartNum');
-const tEndRange = document.getElementById('tEndRange');
 const tEndNum = document.getElementById('tEndNum');
+const tTimeline = document.getElementById('tTimeline');
+const tStrip = document.getElementById('tStrip');
+const tDimL = document.getElementById('tDimL');
+const tDimR = document.getElementById('tDimR');
+const tSelBox = document.getElementById('tSelBox');
+const tPlayhead = document.getElementById('tPlayhead');
+const tHandleS = document.getElementById('tHandleS');
+const tHandleE = document.getElementById('tHandleE');
 const tTrimBtn = document.getElementById('tTrimBtn');
 const tStatus = document.getElementById('tStatus');
 const tDownload = document.getElementById('tDownload');
@@ -1717,31 +1738,155 @@ function updateTrimReadout() {
   const s = clampT(tStartNum.value), e = clampT(tEndNum.value);
   document.getElementById('tSelLen').textContent = trimRangeValid() ? fmtT(e - s) : '—';
   tTrimBtn.disabled = !trimRangeValid() || tTrimming;
+  updateTimeline();
 }
-function bindTrimPair(range, num) {
-  range.addEventListener('input', () => { num.value = parseFloat(range.value).toFixed(1); updateTrimReadout(); });
+function bindTrimNum(num) {
   num.addEventListener('focus', () => { try { num.select(); } catch (_) {} });
-  num.addEventListener('input', () => {
-    const v = parseFloat(num.value);
-    if (isFinite(v)) range.value = Math.min(tDuration, Math.max(0, v));
-    updateTrimReadout();
-  });
+  num.addEventListener('input', updateTrimReadout);
   num.addEventListener('change', () => {
     const v = clampT(num.value);
-    num.value = v.toFixed(1); range.value = v;
+    num.value = v.toFixed(1);
     updateTrimReadout();
   });
 }
-bindTrimPair(tStartRange, tStartNum);
-bindTrimPair(tEndRange, tEndNum);
+bindTrimNum(tStartNum);
+bindTrimNum(tEndNum);
 
-function setTNow(numEl, rangeEl) {
+// ——— Timeline (CapCut-style filmstrip) ———
+function tlTimeFromClientX(clientX) {
+  const r = tTimeline.getBoundingClientRect();
+  const x = Math.min(Math.max(clientX - r.left, 0), r.width);
+  return tDuration > 0 ? (x / r.width) * tDuration : 0;
+}
+function updateTimeline() {
+  if (!tTimeline || tDuration <= 0) return;
+  const s = clampT(tStartNum.value), e = clampT(tEndNum.value);
+  const sp = (s / tDuration) * 100, ep = (e / tDuration) * 100;
+  tHandleS.style.left = sp + '%';
+  tHandleE.style.left = ep + '%';
+  tHandleS.setAttribute('aria-valuenow', s.toFixed(1));
+  tHandleE.setAttribute('aria-valuenow', e.toFixed(1));
+  tDimL.style.left = '0%'; tDimL.style.width = sp + '%';
+  tDimR.style.left = ep + '%'; tDimR.style.width = Math.max(0, 100 - ep) + '%';
+  tSelBox.style.left = sp + '%'; tSelBox.style.width = Math.max(0, ep - sp) + '%';
+}
+function updatePlayhead() {
+  if (!tTimeline || tDuration <= 0 || !tPlayer.duration) { tPlayhead.style.display = 'none'; return; }
+  tPlayhead.style.display = 'block';
+  tPlayhead.style.left = Math.min(100, (tPlayer.currentTime / tDuration) * 100) + '%';
+}
+tPlayer.addEventListener('timeupdate', updatePlayhead);
+
+function bindHandle(handle, isStart) {
+  handle.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    try { handle.setPointerCapture(e.pointerId); } catch (_) {}
+    const move = (ev) => {
+      const t = tlTimeFromClientX(ev.clientX);
+      if (isStart) {
+        const v = Math.min(t, Math.max(0, clampT(tEndNum.value) - 0.1));
+        tStartNum.value = v.toFixed(1);
+      } else {
+        const v = Math.max(t, Math.min(tDuration, clampT(tStartNum.value) + 0.1));
+        tEndNum.value = v.toFixed(1);
+      }
+      updateTrimReadout();
+    };
+    const up = () => {
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', up);
+      handle.removeEventListener('pointercancel', up);
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', up);
+    handle.addEventListener('pointercancel', up);
+  });
+  handle.addEventListener('keydown', (e) => {
+    const step = e.shiftKey ? 1 : 0.1;
+    let v = clampT((isStart ? tStartNum : tEndNum).value);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v -= step;
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v += step;
+    else return;
+    e.preventDefault();
+    v = clampT(v);
+    if (isStart) v = Math.min(v, clampT(tEndNum.value) - 0.1);
+    else v = Math.max(v, clampT(tStartNum.value) + 0.1);
+    (isStart ? tStartNum : tEndNum).value = v.toFixed(1);
+    updateTrimReadout();
+  });
+}
+bindHandle(tHandleS, true);
+bindHandle(tHandleE, false);
+
+// click / scrub on the strip seeks the player
+tTimeline.addEventListener('pointerdown', (e) => {
+  if (e.target === tHandleS || e.target === tHandleE) return;
+  const seek = (ev) => { try { tPlayer.currentTime = tlTimeFromClientX(ev.clientX); } catch (_) {} };
+  seek(e);
+  const move = (ev) => seek(ev);
+  const up = () => {
+    tTimeline.removeEventListener('pointermove', move);
+    tTimeline.removeEventListener('pointerup', up);
+    tTimeline.removeEventListener('pointercancel', up);
+  };
+  tTimeline.addEventListener('pointermove', move);
+  tTimeline.addEventListener('pointerup', up);
+  tTimeline.addEventListener('pointercancel', up);
+});
+
+// filmstrip thumbnails, generated by seeking a scratch video element
+let tStripToken = 0;
+async function buildFilmstrip() {
+  const token = ++tStripToken;
+  tStrip.innerHTML = '';
+  if (!tPlayerUrl || tDuration <= 0) return;
+  try {
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto';
+    v.src = tPlayerUrl;
+    await new Promise((res, rej) => {
+      v.onloadedmetadata = res; v.onerror = rej;
+      setTimeout(() => rej(new Error('thumb-timeout')), 8000);
+    });
+    if (token !== tStripToken) return;
+    const dur = v.duration || tDuration;
+    const N = Math.max(6, Math.min(16, Math.round((tTimeline.clientWidth || 960) / 80)));
+    const canvas = document.createElement('canvas');
+    canvas.width = 96; canvas.height = 54;
+    const ctx = canvas.getContext('2d');
+    const seekTo = (t) => new Promise((res) => {
+      let done = false;
+      const finish = () => { if (!done) { done = true; v.removeEventListener('seeked', finish); res(); } };
+      v.addEventListener('seeked', finish);
+      try { v.currentTime = Math.min(Math.max(t, 0), Math.max(0, dur - 0.1)); }
+      catch (_) { finish(); }
+      setTimeout(finish, 1200);
+    });
+    for (let i = 0; i < N; i++) {
+      if (token !== tStripToken) return;
+      await seekTo(((i + 0.5) / N) * dur);
+      try {
+        ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/jpeg', 0.55);
+        img.alt = ''; img.draggable = false;
+        tStrip.appendChild(img);
+      } catch (_) {}
+    }
+    v.removeAttribute('src'); v.load();
+  } catch (_) {
+    /* thumbnails are optional — the timeline still works on the dark strip */
+  }
+}
+
+
+function setTNow(numEl) {
   const t = Math.min(tDuration, Math.max(0, tPlayer.currentTime || 0));
-  numEl.value = t.toFixed(1); rangeEl.value = t;
+  numEl.value = t.toFixed(1);
   updateTrimReadout();
 }
-document.getElementById('tStartNow').onclick = () => setTNow(tStartNum, tStartRange);
-document.getElementById('tEndNow').onclick = () => setTNow(tEndNum, tEndRange);
+document.getElementById('tStartNow').onclick = () => setTNow(tStartNum);
+document.getElementById('tEndNow').onclick = () => setTNow(tEndNum);
 document.getElementById('tEngineRetry').onclick = () => { loadingPromise = null; loadFFmpeg(true).catch(() => {}); };
 
 function setTrimFile(f) {
@@ -1760,11 +1905,11 @@ function setTrimFile(f) {
 }
 tPlayer.onloadedmetadata = () => {
   tDuration = tPlayer.duration || 0;
-  for (const el of [tStartRange, tEndRange]) { el.max = tDuration.toFixed(1); }
   for (const el of [tStartNum, tEndNum]) { el.max = tDuration.toFixed(1); }
-  tStartNum.value = '0.0'; tStartRange.value = 0;
-  tEndNum.value = tDuration.toFixed(1); tEndRange.value = tDuration.toFixed(1);
+  tStartNum.value = '0.0';
+  tEndNum.value = tDuration.toFixed(1);
   updateTrimReadout();
+  buildFilmstrip();
 };
 
 async function trimVideo() {
@@ -1819,6 +1964,8 @@ document.getElementById('tNewBtn').onclick = () => {
   tEditor.style.display = 'none';
   tDrop.style.display = '';
   tInput.value = '';
+  tStripToken++; tStrip.innerHTML = '';
+  tPlayhead.style.display = 'none';
   if (tPlayerUrl) { URL.revokeObjectURL(tPlayerUrl); tPlayerUrl = null; }
   tPlayer.removeAttribute('src'); tPlayer.load();
   tFile = null; tDuration = 0; tStatus.textContent = '';
