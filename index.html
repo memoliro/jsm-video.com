@@ -181,6 +181,7 @@ a:hover { color: var(--primary-hover); }
   position: sticky;
   top: 0;
   z-index: 50;
+  transition: transform .28s ease;
 }
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .hrow {
@@ -553,6 +554,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
     box-shadow: 0 10px 30px rgba(0,0,0,.25);
   }
   .navLinks.open a { width: 100%; box-sizing: border-box; }
+  .header.header-hide { transform: translateY(-110%); }
 }
 
 .engineBanner{
@@ -2256,6 +2258,31 @@ setupDrop(tDrop, tInput, files => setTrimFile(files && files[0]));
   });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
   window.addEventListener('resize', function(){ if (window.innerWidth > 720) close(); });
+})();
+</script>
+<script>
+// Auto-hide header on scroll down, reveal on scroll up (mobile only)
+(function(){
+  var header = document.querySelector('header.header');
+  var nav = document.querySelector('.navLinks');
+  if (!header) return;
+  var lastY = window.scrollY, ticking = false;
+  function update(){
+    ticking = false;
+    var y = window.scrollY;
+    var mobile = window.matchMedia('(max-width: 720px)').matches;
+    if (!mobile || (nav && nav.classList.contains('open'))) {
+      header.classList.remove('header-hide');
+    } else if (y > lastY && y > 140) {
+      header.classList.add('header-hide');
+    } else if (y < lastY - 4) {
+      header.classList.remove('header-hide');
+    }
+    lastY = y;
+  }
+  window.addEventListener('scroll', function(){
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
 })();
 </script>
 
