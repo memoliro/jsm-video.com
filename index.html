@@ -855,6 +855,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                 <div style="margin-bottom:12px">
                   <video id="tPlayer" controls playsinline preload="metadata" style="width:100%;max-height:380px;border-radius:12px;background:#000"></video>
                 </div>
+                <div id="tFileMeta" style="font-size:13px;color:var(--muted);margin-bottom:6px;overflow-wrap:break-word"></div>
                 <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Duration: <b id="tDuration" style="color:var(--text)">—</b> &nbsp;·&nbsp; Selected: <b id="tSelLen" style="color:var(--text)">—</b></div>
 
                 <div id="tTimeline" class="tl" aria-label="Video timeline — drag the blue handles to set trim start and end">
@@ -904,6 +905,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                   <button id="tSaveBtn" class="btn btn-green">💾 Save video</button>
                   <button id="tNewBtn" class="btn btn-ghost">Choose another file</button>
                   <a id="tDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+                  <button id="tToConverter" class="btn" style="display:none">↗ Convert / flip</button>
                 </div>
                 <div id="tStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
               </aside>
@@ -1852,6 +1854,9 @@ setupDrop(vDrop, vInput, addVFiles);
 let tFile = null, tDuration = 0, tTrimming = false, tPlayerUrl = null;
 let tCuts = [], tOpLabel = 'Saving', tSegLabel = '';
 const tDrop = document.getElementById('tDrop');
+const tFileMeta = document.getElementById('tFileMeta');
+const tToConverter = document.getElementById('tToConverter');
+let tLastOutput = null;
 const tInput = document.getElementById('tInput');
 const tEditor = document.getElementById('tEditor');
 const tPlayer = document.getElementById('tPlayer');
@@ -2067,6 +2072,10 @@ function setTrimFile(f) {
   tEditor.style.display = 'block';
   tDrop.style.display = 'none';
   tDownload.style.display = 'none';
+  tToConverter.style.display = 'none';
+  tLastOutput = null;
+  const tExt = ((f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^\w]/g, '')) || 'mp4';
+  tFileMeta.innerHTML = `<b style="color:var(--text)">${escapeHtml(f.name)}</b> &nbsp;·&nbsp; ${escapeHtml(tExt.toUpperCase())} &nbsp;·&nbsp; ${fmtSize(f.size)}`;
   tStatus.textContent = '';
   tCuts = []; renderCuts();
   loadFFmpeg().catch(() => {});
@@ -2200,6 +2209,8 @@ async function saveVideo() {
     const sizeLabel = data.length < 1048576 ? `${Math.max(1, Math.round(data.length / 1024))} KB` : `${(data.length / 1048576).toFixed(1)} MB`;
     tDownload.textContent = `⬇ Download ${outName} (${sizeLabel})`;
     tDownload.style.display = 'inline-block';
+    tLastOutput = { data, mime, name: outName };
+    tToConverter.style.display = 'inline-block';
     tProgressBar.style.width = '100%';
     const removed = tCuts.reduce((a, c) => a + (c.e - c.s), 0);
     tStatus.textContent = `✅ Saved — removed ${tCuts.length} part${tCuts.length === 1 ? '' : 's'} (${fmtT(removed)} total).` +
@@ -2318,6 +2329,9 @@ function clearTrimFile() {
   tPlayer.removeAttribute('src'); tPlayer.load();
   tFile = null; tDuration = 0; tStatus.textContent = '';
   tCuts = []; renderCuts();
+  tFileMeta.innerHTML = '';
+  tToConverter.style.display = 'none';
+  tLastOutput = null;
   updateTrimReadout();
 }
 
@@ -2334,6 +2348,16 @@ function trimmerPick(files) {
 }
 
 document.getElementById('tNewBtn').onclick = () => { tInput.value = ''; tInput.click(); };
+tToConverter.onclick = () => {
+  if (!tLastOutput) return;
+  const f = new File([tLastOutput.data], tLastOutput.name, { type: tLastOutput.mime });
+  addVFiles([f]);
+  selectVFileByFile(f);
+  renderV();
+  const vb = document.querySelector('.tabBtn[data-tab="video"]');
+  if (vb) { vb.click(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  vStatus.textContent = 'Trimmed video loaded — pick a format, flip or rotate, then Convert.';
+};
 setupDrop(tDrop, tInput, trimmerPick);
 window.__trimReady = true;
 restoreVFiles();
