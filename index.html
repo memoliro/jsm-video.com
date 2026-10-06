@@ -524,6 +524,13 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 .navLinks { display: flex; gap: 16px; align-items: center; }
 .hright { display: flex; align-items: center; gap: 12px; }
+.navToggle {
+  display: none;
+  width: 42px; height: 42px; border-radius: 12px; flex: 0 0 auto;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--text); font-size: 1.25rem; cursor: pointer;
+  align-items: center; justify-content: center;
+}
 .navLinks a {
   font-size: 0.8125rem; font-weight: 700; color: var(--text);
   background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -533,15 +540,19 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 .navLinks a:hover { color: var(--text); }
 .navLinks a.active { outline: 2px solid #60a5fa; outline-offset: 2px; }
 @media (max-width: 720px) {
+  .navToggle { display: inline-flex; }
   .hright { flex-wrap: wrap; row-gap: 8px; }
-  .tabs { order: 1; }
-  .themeBtn { order: 2; margin-left: auto; }
-  .navLinks {
-    display: flex; order: 3; flex: 1 1 100%;
-    overflow-x: auto; gap: 8px; padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
+  .hrow { position: relative; }
+  .navLinks { display: none; }
+  .navLinks.open {
+    display: flex; position: absolute; top: calc(100% + 8px); right: 0;
+    flex-direction: column; align-items: stretch;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 8px; gap: 6px; margin: 0;
+    min-width: 220px; z-index: 60;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
   }
-  .navLinks a { flex: 0 0 auto; padding: 8px 12px; }
+  .navLinks.open a { width: 100%; box-sizing: border-box; }
 }
 
 .engineBanner{
@@ -579,6 +590,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
         <a href="/about.html">About</a>
       </nav>
       <button id="themeToggle" class="themeBtn" aria-label="Toggle light mode" title="Toggle theme">☀️</button>
+      <button id="navToggle" class="navToggle" aria-label="Open menu" aria-expanded="false">☰</button>
     </div>
   </div>
 </header>
@@ -1953,6 +1965,26 @@ setupDrop(tDrop, tInput, files => setTrimFile(files && files[0]));
       window.location.reload();
     });
   }
+})();
+</script>
+
+<script>
+// Mobile hamburger menu
+(function(){
+  var t = document.getElementById('navToggle');
+  var n = document.querySelector('.navLinks');
+  if (!t || !n) return;
+  function close(){ n.classList.remove('open'); t.setAttribute('aria-expanded','false'); }
+  t.addEventListener('click', function(e){
+    e.stopPropagation();
+    var open = n.classList.toggle('open');
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.addEventListener('click', function(e){
+    if (n.classList.contains('open') && !n.contains(e.target)) close();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  window.addEventListener('resize', function(){ if (window.innerWidth > 720) close(); });
 })();
 </script>
 
