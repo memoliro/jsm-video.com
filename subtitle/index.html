@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-adsense-account" content="ca-pub-4747106371991816">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free SRT to VTT converter, shift subtitle timing, merge SRT files. Fix sync delay, clean formatting, 100% private — no uploads, runs in your browser.">
+<meta name="theme-color" content="#0b1120">
+<meta property="og:image" content="https://jsm-video.com/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<title>Subtitle Toolkit — SRT to VTT Converter, Shift Delay, Merge | 100% Private | JSM-Video.com</title>
+<link rel="canonical" href="https://jsm-video.com/subtitle/">
+<meta property="og:title" content="Subtitle Toolkit — SRT ↔ VTT, Shift Timing, Merge">
+<meta property="og:description" content="Convert SRT to VTT, shift subtitle delay, merge and clean subtitles. 100% private, no uploads, instant.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jsm-video.com/subtitle/">
+<meta property="og:site_name" content="JSM-Video.com">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Subtitle Toolkit — SRT ↔ VTT Converter">
+<meta name="twitter:description" content="Fix sync, convert formats, merge SRT/VTT. 100% private, no upload.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "JSM Subtitle Toolkit",
+  "url": "https://jsm-video.com/subtitle/",
+  "description": "Free subtitle toolkit: SRT to VTT converter, shift subtitle timing, merge SRT files, clean formatting. Private, offline, no upload.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "featureList": ["SRT to VTT", "VTT to SRT", "shift subtitle delay", "merge subtitles", "clean subtitles", "private offline"],
+  "publisher": {"@type": "Organization", "name": "JSM-Video.com", "url": "https://jsm-video.com/"}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question","name": "How to convert SRT to VTT?","acceptedAnswer": {"@type": "Answer","text": "Drop your .srt file, select VTT as output, click Download. Conversion happens instantly in your browser — no upload."}},
+    {"@type": "Question","name": "How to shift subtitle delay?","acceptedAnswer": {"@type": "Answer","text": "Load subtitles, go to Shift tab, enter delay in ms (e.g. +500ms or -1000ms) and click Apply. All timestamps are adjusted."}},
+    {"@type": "Question","name": "Are my subtitles uploaded?","acceptedAnswer": {"@type": "Answer","text": "No. Everything runs locally using JavaScript. Your .srt and .vtt files never leave your device."}}
+  ]
+}
+</script>
+<link rel="manifest" href="/manifest.json">
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('theme');
+    if(!saved){ saved = 'light'; }
+    document.documentElement.setAttribute('data-theme', saved);
+  }catch(e){
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'granted',
+    security_storage: 'granted',
+    wait_for_update: 500
+  });
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-Q6QJX3F5R3"></script>
+<script>
+  gtag('js', new Date());
+  gtag('config', 'G-Q6QJX3F5R3', { anonymize_ip: true });
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4747106371991816" crossorigin="anonymous"></script>
+<script>(adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1;</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f1f5f9;
+  --bg-elevated: #ffffff;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-secondary: #334155;
+  --muted: #64748b;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-soft: #eff6ff;
+  --primary-border: #93c5fd;
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+  --success-text: #166534;
+  --danger: #dc2626;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+[data-theme="dark"] {
+  --bg: #0b1120;
+  --bg-elevated: #111827;
+  --card: #1e293b;
+  --border: #334155;
+  --border-strong: #475569;
+  --text: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --muted: #94a3b8;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-soft: #1e3a5f;
+  --primary-border: #3b82f6;
+  --success: #22c55e;
+  --success-soft: #14532d;
+  --success-text: #86efac;
+  --danger: #ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--primary);text-decoration:none}
+a:hover{text-decoration:underline}
+.header{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);backdrop-filter:blur(8px)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.hrow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;gap:12px}
+.logoRow{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;color:var(--text)}
+.logoRow img{width:40px;height:40px;border-radius:12px}
+.brand{font-weight:800;font-size:1.25rem;letter-spacing:-0.03em;color:var(--text)}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;border:1px solid var(--border)}
+.tabBtn{padding:8px 16px;border-radius:8px;border:0;background:transparent;color:var(--muted);font-weight:600;font-size:0.875rem;cursor:pointer;font-family:inherit;transition:all 0.15s ease;white-space:nowrap}
+.tabBtn:hover{color:var(--text)}
+.tabBtn.active{background:var(--card);color:var(--text);box-shadow:var(--shadow-sm);border:1px solid var(--border)}
+.themeBtn{width:42px;height:42px;border-radius:12px;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:1.125rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s ease;box-shadow:var(--shadow-sm)}
+.themeBtn:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+@media (max-width: 1024px){.grid2{grid-template-columns:1fr}}
+.hero-title{font-size:clamp(1.6rem,4vw,2rem);font-weight:800;text-align:center;letter-spacing:-0.03em;line-height:1.15;margin-bottom:8px}
+.hero-sub{text-align:center;color:var(--muted);font-size:0.9rem;margin-bottom:4px}
+.privacy-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0 24px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:600;color:var(--text-secondary);background:var(--bg);border:1px solid var(--border);padding:6px 12px;border-radius:999px}
+.drop{border:2px dashed var(--primary-border);background:var(--primary-soft);border-radius:var(--radius-lg);padding:42px 20px;text-align:center;cursor:pointer;transition:all 0.2s ease;position:relative}
+.drop:hover,.drop.dragover{border-color:var(--primary);background:color-mix(in srgb, var(--primary-soft) 80%, var(--primary) 8%);transform:translateY(-2px);box-shadow:var(--shadow)}
+.plus{width:64px;height:64px;background:linear-gradient(135deg, var(--primary), #1d4ed8);border-radius:50%;color:#fff;font-size:1.75rem;font-weight:300;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 8px 20px rgba(37, 99, 235, 0.3)}
+.drop-title{font-weight:700;color:var(--primary);font-size:1.0625rem}
+.drop-hint{font-size:0.75rem;color:var(--muted);margin-top:6px}
+.btn{padding:10px 18px;border-radius:var(--radius-sm);border:0;cursor:pointer;font-weight:600;font-size:0.875rem;font-family:inherit;transition:all 0.15s ease;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.btn:active{transform:scale(0.98)}
+.btn-blue{background:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,0.3)}
+.btn-blue:hover{background:var(--primary-hover)}
+.btn-green{background:var(--success);color:#fff;box-shadow:0 2px 8px rgba(22,163,74,0.25)}
+.btn-green:hover{filter:brightness(1.08)}
+.btn-ghost{background:var(--bg);border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--border-strong);background:var(--card)}
+.btn:disabled{opacity:0.55;cursor:not-allowed;transform:none}
+select,input[type="number"],input[type="text"],textarea{border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;background:var(--card);color:var(--text);font-size:0.875rem;font-family:inherit;transition:border-color 0.15s, box-shadow 0.15s;width:100%}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,0.15)}
+textarea{resize:vertical}
+.navLinks{display:flex;gap:16px;align-items:center}
+.navLinks a{font-size:0.8125rem;font-weight:700;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;text-decoration:none;white-space:nowrap;transition:all 0.15s ease;box-shadow:var(--shadow-sm)}
+.navLinks a:hover{border-color:var(--primary-border);color:var(--primary)}
+@media (max-width:720px){.navLinks{display:none}}
+footer{background:var(--card);border-top:1px solid var(--border);margin-top:56px;padding:36px 0;font-size:0.8125rem;color:var(--muted)}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{color:var(--muted);font-weight:500}
+.footer-links a:hover{color:var(--text)}
+/* subtitle specific */
+.tool-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;border:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tool-tab{padding:8px 14px;border-radius:8px;border:0;background:transparent;color:var(--muted);font-weight:700;font-size:0.8125rem;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.tool-tab.active{background:var(--card);color:var(--text);box-shadow:var(--shadow-sm);border:1px solid var(--border)}
+.tool-panel{display:none}
+.tool-panel.active{display:block}
+.cue-list{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--bg);max-height:640px;overflow-y:auto}
+.cue-row{display:grid;grid-template-columns:48px 108px 108px 1fr 32px;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);align-items:start;background:var(--card)}
+.cue-row:last-child{border-bottom:0}
+.cue-index{font-weight:800;color:var(--muted);font-size:0.75rem;text-align:center;padding-top:9px}
+.time-input{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:0.75rem;padding:7px 8px;text-align:center}
+.cue-text{font-size:0.8125rem;line-height:1.5;min-height:44px}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.icon-btn:hover{border-color:var(--danger);color:var(--danger);background:var(--card)}
+.file-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.file-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border:1px solid var(--border);padding:10px 12px;border-radius:12px;font-size:0.8125rem}
+.file-badge{font-size:0.6875rem;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-border)}
+.shift-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+@media(max-width:640px){.shift-grid{grid-template-columns:repeat(2,1fr)} .cue-row{grid-template-columns:36px 1fr 1fr; gap:6px} .cue-row .cue-text{grid-column:1/-1} .cue-row .icon-btn{grid-column:3;justify-self:end}}
+.output-box{font-family:ui-monospace, SFMono-Regular, Menlo, monospace;font-size:0.75rem;white-space:pre-wrap;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;max-height:420px;overflow:auto;line-height:1.6}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.stat{font-size:0.75rem;background:var(--bg);border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-weight:600;color:var(--text-secondary)}
+.action-bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--border);padding:14px 0;margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.paste-area{margin-top:16px}
+.paste-area textarea{font-family:ui-monospace, monospace;font-size:0.8rem;min-height:120px}
+.kbd{font-family:ui-monospace,monospace;font-size:0.7rem;background:var(--bg);border:1px solid var(--border);border-bottom-width:2px;padding:2px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="wrap hrow">
+    <a href="/" class="logoRow">
+      <img src="/assets/favicon.svg" alt="JSM-Video" width="40" height="40">
+      <span class="brand">JSM-Video.com</span>
+      <span style="background:#16a34a;color:white;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800">100% PRIVATE</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <nav class="navLinks">
+        <a href="/">🎬 Video Converter</a>
+        <a href="/subtitle/" style="color:var(--primary);border-color:var(--primary-border)">📝 Subtitle Toolkit</a>
+      </nav>
+      <button id="themeToggle" class="themeBtn" aria-label="Toggle theme">☀️</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" style="padding:28px 20px 0">
+  <main>
+    <div class="card">
+      <h1 class="hero-title">Subtitle Toolkit — SRT to VTT Converter</h1>
+      <p class="hero-sub">Convert <strong>SRT ↔ VTT</strong>, shift subtitle delay, merge and clean — 100% in your browser. No upload.</p>
+      <div class="privacy-pills">
+        <span class="pill">🔒 No upload</span>
+        <span class="pill">⚡ Instant</span>
+        <span class="pill">🎯 Frame-accurate</span>
+        <span class="pill">🧹 No ads in tool</span>
+      </div>
+
+      <div id="dropZone" class="drop" tabindex="0" role="button" aria-label="Upload subtitles">
+        <div class="plus">+</div>
+        <div class="drop-title">Drop .srt, .vtt, .txt here or click to browse</div>
+        <div class="drop-hint">Supports multiple files — we'll merge them intelligently. Pure text processing.</div>
+        <input id="fileInput" type="file" accept=".srt,.vtt,.txt,text/plain" multiple hidden>
+      </div>
+
+      <div class="paste-area">
+        <label style="font-size:0.8125rem;font-weight:700;margin-bottom:6px;display:block">Or paste subtitle text:</label>
+        <textarea id="pasteInput" placeholder="1&#10;00:00:01,000 --> 00:00:04,000&#10;Hello world&#10;&#10;WEBVTT&#10;&#10;00:00:01.000 --> 00:00:04.000&#10;Hello world"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-ghost" id="btnPaste">Parse pasted text</button>
+          <button class="btn btn-ghost" id="btnExampleSRT">Example SRT</button>
+          <button class="btn btn-ghost" id="btnExampleVTT">Example VTT</button>
+        </div>
+      </div>
+
+      <div id="fileList" class="file-list"></div>
+
+      <div id="stats" class="stats" style="display:none"></div>
+
+      <div id="editor" style="display:none;margin-top:22px">
+        <div class="grid2">
+          <!-- Left: cue list -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+              <h3 style="font-size:0.95rem;font-weight:800">Cues — editable</h3>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-ghost" id="btnAddCue" style="padding:6px 10px;font-size:0.75rem">+ Add cue</button>
+                <button class="btn btn-ghost" id="btnSort" style="padding:6px 10px;font-size:0.75rem">Sort by time</button>
+              </div>
+            </div>
+            <div id="cueList" class="cue-list"></div>
+          </div>
+
+          <!-- Right: tools -->
+          <div class="card" style="padding:20px;position:sticky;top:88px">
+            <div class="tool-tabs" role="tablist">
+              <button class="tool-tab active" data-tool="convert">Convert</button>
+              <button class="tool-tab" data-tool="shift">Shift</button>
+              <button class="tool-tab" data-tool="merge">Merge</button>
+              <button class="tool-tab" data-tool="clean">Clean</button>
+            </div>
+
+            <!-- CONVERT -->
+            <div id="tool-convert" class="tool-panel active">
+              <h4 style="font-size:0.875rem;font-weight:800;margin-bottom:8px">SRT ↔ VTT Converter</h4>
+              <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">SRT uses comma <span class="kbd">00:00:01,000</span>, VTT uses dot <span class="kbd">00:00:01.000</span> and WEBVTT header. We handle it perfectly.</p>
+              <label style="font-size:0.8rem;font-weight:700;display:block;margin:10px 0 6px">Output format</label>
+              <div style="display:flex;gap:8px;margin-bottom:12px">
+                <button class="btn btn-blue" id="btnOutSRT" style="flex:1">Export .SRT</button>
+                <button class="btn btn-blue" id="btnOutVTT" style="flex:1">Export .VTT</button>
+              </div>
+              <label style="font-size:0.8rem;font-weight:700;display:block;margin:10px 0 6px">Filename</label>
+              <input id="outName" type="text" value="subtitles" placeholder="subtitles">
+              <div style="margin-top:14px">
+                <div style="font-size:0.8rem;font-weight:700;margin-bottom:6px">Preview</div>
+                <div id="outputPreview" class="output-box">No cues yet</div>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="btn btn-ghost" id="btnCopy" style="flex:1">Copy</button>
+                  <button class="btn btn-green" id="btnDownload" style="flex:1">Download</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- SHIFT -->
+            <div id="tool-shift" class="tool-panel">
+              <h4 style="font-size:0.875rem;font-weight:800;margin-bottom:8px">Shift subtitle delay</h4>
+              <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">Fix out-of-sync subtitles. Positive = delay, negative = earlier.</p>
+              <div class="shift-grid">
+                <button class="btn btn-ghost" data-shift="-5000">-5s</button>
+                <button class="btn btn-ghost" data-shift="-1000">-1s</button>
+                <button class="btn btn-ghost" data-shift="-500">-0.5s</button>
+                <button class="btn btn-ghost" data-shift="500">+0.5s</button>
+                <button class="btn btn-ghost" data-shift="1000">+1s</button>
+                <button class="btn btn-ghost" data-shift="5000">+5s</button>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div>
+                  <label style="font-size:0.75rem;font-weight:700">Delay (ms)</label>
+                  <input id="shiftMs" type="number" value="0" step="100" placeholder="e.g. 500">
+                </div>
+                <div>
+                  <label style="font-size:0.75rem;font-weight:700">Delay (sec)</label>
+                  <input id="shiftSec" type="number" value="0" step="0.1" placeholder="0.5">
+                </div>
+              </div>
+              <button class="btn btn-blue" id="btnApplyShift" style="width:100%;margin-top:10px">Apply shift</button>
+
+              <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:14px">
+                <label style="font-size:0.75rem;font-weight:700">Speed / stretch (fix FPS drift)</label>
+                <div style="display:flex;gap:8px;margin-top:6px">
+                  <input id="speedFactor" type="number" value="1" step="0.001" placeholder="1.0">
+                  <button class="btn btn-ghost" id="btnApplySpeed">Stretch</button>
+                </div>
+                <p style="font-size:0.7rem;color:var(--muted);margin-top:6px">1.0 = normal. 0.9 = slower, 1.1 = faster. Anchor = first cue.</p>
+              </div>
+
+              <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:14px">
+                <label style="font-size:0.75rem;font-weight:700">First cue should start at</label>
+                <div style="display:flex;gap:8px;margin-top:6px">
+                  <input id="firstCueTarget" type="text" placeholder="00:00:01,000">
+                  <button class="btn btn-ghost" id="btnSyncFirst">Sync</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- MERGE -->
+            <div id="tool-merge" class="tool-panel">
+              <h4 style="font-size:0.875rem;font-weight:800;margin-bottom:8px">Merge files</h4>
+              <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">Load 2+ files above. Choose how to combine.</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="display:flex;gap:8px;align-items:start;font-size:0.8125rem;background:var(--bg);border:1px solid var(--border);padding:10px;border-radius:10px;cursor:pointer">
+                  <input type="radio" name="mergeMode" value="concat" checked> <span><strong>Concatenate</strong><br><span style="color:var(--muted);font-size:0.75rem">File 2 starts after File 1 ends</span></span>
+                </label>
+                <label style="display:flex;gap:8px;align-items:start;font-size:0.8125rem;background:var(--bg);border:1px solid var(--border);padding:10px;border-radius:10px;cursor:pointer">
+                  <input type="radio" name="mergeMode" value="sort"> <span><strong>Merge & sort by time</strong><br><span style="color:var(--muted);font-size:0.75rem">Interleave cues chronologically</span></span>
+                </label>
+                <label style="display:flex;gap:8px;align-items:start;font-size:0.8125rem;background:var(--bg);border:1px solid var(--border);padding:10px;border-radius:10px;cursor:pointer">
+                  <input type="radio" name="mergeMode" value="gap"> <span><strong>Concatenate + 1s gap</strong><br><span style="color:var(--muted);font-size:0.75rem">Add 1 second between files</span></span>
+                </label>
+              </div>
+              <button class="btn btn-blue" id="btnDoMerge" style="width:100%;margin-top:12px">Merge now</button>
+              <p style="font-size:0.7rem;color:var(--muted);margin-top:8px">Tip: For multi-part movies, use Concatenate. For dual languages, use Merge & Sort.</p>
+            </div>
+
+            <!-- CLEAN -->
+            <div id="tool-clean" class="tool-panel">
+              <h4 style="font-size:0.875rem;font-weight:800;margin-bottom:8px">Clean & fix</h4>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button class="btn btn-ghost" id="btnRemoveHTML">Remove &lt;i&gt; &lt;b&gt; &lt;font&gt; tags</button>
+                <button class="btn btn-ghost" id="btnRemoveBrackets">Remove [Music] (hearing impaired)</button>
+                <button class="btn btn-ghost" id="btnTrim">Trim whitespace</button>
+                <button class="btn btn-ghost" id="btnDedup">Remove duplicate cues</button>
+                <button class="btn btn-ghost" id="btnFixOverlap">Fix overlaps</button>
+                <button class="btn btn-ghost" id="btnRenumber">Renumber from 1</button>
+              </div>
+              <div style="margin-top:14px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;font-size:0.75rem;color:var(--muted)">
+                All cleaning is reversible via undo (Ctrl+Z in browser) if you re-paste, but we keep it safe — no cue is deleted unless you click.
+              </div>
+            </div>
+
+          </div>
+
+          <div style="margin-top:16px;font-size:0.75rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap">
+            <span><span class="kbd">Ctrl</span>+<span class="kbd">Enter</span> download</span>
+            <span><span class="kbd">Click time</span> to edit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO content -->
+    <div class="card" style="margin-top:28px">
+      <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:12px">Why this subtitle toolkit?</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
+        <div>
+          <h3 style="font-size:0.875rem;font-weight:700;margin-bottom:6px">SRT to VTT, VTT to SRT</h3>
+          <p style="font-size:0.8125rem;color:var(--muted);line-height:1.6">SRT is classic (SubRip), VTT is modern for HTML5 video. This tool converts with 100% timecode accuracy, preserving line breaks and handling malformed files from auto-generators.</p>
+        </div>
+        <div>
+          <h3 style="font-size:0.875rem;font-weight:700;margin-bottom:6px">Shift subtitle delay</h3>
+          <p style="font-size:0.8125rem;color:var(--muted);line-height:1.6">Audio out of sync? Shift by milliseconds or seconds. Quick buttons for ±0.5s, ±1s, ±5s — the exact terms people search. Also stretch for FPS drift (23.976 → 25).</p>
+        </div>
+        <div>
+          <h3 style="font-size:0.875rem;font-weight:700;margin-bottom:6px">Merge & clean</h3>
+          <p style="font-size:0.8125rem;color:var(--muted);line-height:1.6">Combine multi-part subtitles, remove hearing-impaired tags, strip HTML styling, fix overlaps. Built for creators who need clean captions for YouTube, Vimeo, and OTT.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h3 style="font-size:1rem;font-weight:800;margin-bottom:10px">How to use</h3>
+      <ol style="font-size:0.875rem;color:var(--muted);padding-left:18px;line-height:1.8">
+        <li>Drop .srt or .vtt files — or paste text. We auto-detect format.</li>
+        <li>Edit cues if needed — click timecodes or text.</li>
+        <li>Go to <strong>Shift</strong> to fix delay, <strong>Merge</strong> to combine files, <strong>Clean</strong> to strip formatting.</li>
+        <li>Choose output format (SRT or VTT) and Download. All processing stays on your device.</li>
+      </ol>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div>© 2026 JSM-Video.com — Free tools, 100% private. Built by <a href="https://memoliro.com" target="_blank">Memoliro</a></div>
+    <div class="footer-links">
+      <a href="/">Video Converter</a>
+      <a href="/subtitle/">Subtitle Toolkit</a>
+      <a href="/about.html">About</a>
+      <a href="/privacy-policy.html">Privacy</a>
+      <a href="#" id="cookieSettingsBtn">Cookie Settings</a>
+    </div>
+  </div>
+</footer>
+
+<div id="consentBanner" role="dialog" aria-label="Cookie consent" style="display:none;position:fixed;bottom:16px;left:16px;right:16px;max-width:720px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:9999;gap:12px;align-items:center;flex-wrap:wrap">
+  <div style="flex:1;min-width:240px;font-size:0.9rem;line-height:1.5">
+    We use cookies for analytics and advertising. Click <strong>Accept</strong> to share data with Google for ads personalization. <a href="/privacy-policy.html">Privacy</a>
+  </div>
+  <button id="consentAccept" type="button" style="padding:10px 18px;border-radius:10px;border:0;background:#2563eb;color:white;font-weight:700;cursor:pointer;white-space:nowrap">Accept</button>
+</div>
+
+<script>
+/* THEME */
+(function(){
+  const btn = document.getElementById('themeToggle');
+  function apply(t){
+    document.documentElement.setAttribute('data-theme', t);
+    try{localStorage.setItem('theme', t)}catch(e){}
+    if(btn) btn.textContent = t==='dark'?'🌙':'☀️';
+  }
+  btn?.addEventListener('click', ()=>{
+    const cur = document.documentElement.getAttribute('data-theme')||'light';
+    apply(cur==='dark'?'light':'dark');
+  });
+  apply(document.documentElement.getAttribute('data-theme')||'light');
+})();
+
+/* CONSENT (same as main site) */
+(function () {
+  const CONSENT_KEY = 'jsm_video_consent_v2';
+  const banner = document.getElementById('consentBanner');
+  const acceptButton = document.getElementById('consentAccept');
+  function initializeAds() {
+    document.querySelectorAll('ins.adsbygoogle').forEach(function (ad) {
+      if (ad.dataset.adsInitialized === '1' || ad.getAttribute('data-adsbygoogle-status')) return;
+      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); ad.dataset.adsInitialized = '1'; } catch (e) {}
+    });
+  }
+  function grantConsent() {
+    try { gtag('consent', 'update', {ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});}catch(e){}
+    try{localStorage.setItem(CONSENT_KEY,'1')}catch(e){}
+    if(banner) banner.style.display='none';
+    try{(window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 0}catch(e){}
+    initializeAds();
+  }
+  function restoreAcceptedConsent(){
+    try{gtag('consent','update',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'})}catch(e){}
+    try{(window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 0}catch(e){}
+    initializeAds();
+  }
+  let accepted=false;
+  try{accepted=localStorage.getItem(CONSENT_KEY)==='1'}catch(e){}
+  if(accepted){ if(banner) banner.style.display='none'; restoreAcceptedConsent(); }
+  else{ if(banner) banner.style.display='flex'; }
+  acceptButton?.addEventListener('click', grantConsent);
+  document.getElementById('cookieSettingsBtn')?.addEventListener('click', e=>{ e.preventDefault(); try{localStorage.removeItem(CONSENT_KEY)}catch(e){} location.reload(); });
+})();
+
+/* SUBTITLE TOOLKIT CORE */
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const pasteInput = document.getElementById('pasteInput');
+const fileListEl = document.getElementById('fileList');
+const cueListEl = document.getElementById('cueList');
+const editorEl = document.getElementById('editor');
+const statsEl = document.getElementById('stats');
+const outputPreview = document.getElementById('outputPreview');
+const outNameInput = document.getElementById('outName');
+
+let filesData = []; // {name, cues, format}
+let cues = []; // active merged cues
+let outputFormat = 'srt'; // srt | vtt
+
+// --- time helpers ---
+function parseTimeToMs(t){
+  // supports 00:00:01,000 or 00:00:01.000 or 00:01.000
+  if(!t) return 0;
+  t = t.trim().replace(',', '.');
+  const parts = t.split(':');
+  let h=0,m=0,s=0;
+  if(parts.length===3){ h=parseInt(parts[0])||0; m=parseInt(parts[1])||0; s=parseFloat(parts[2])||0; }
+  else if(parts.length===2){ m=parseInt(parts[0])||0; s=parseFloat(parts[1])||0; }
+  else { s=parseFloat(parts[0])||0; }
+  return Math.round((h*3600 + m*60 + s)*1000);
+}
+function formatMsToSRT(ms){
+  ms = Math.max(0, ms);
+  const totalSec = Math.floor(ms/1000);
+  const milli = ms % 1000;
+  const h = Math.floor(totalSec/3600);
+  const m = Math.floor((totalSec%3600)/60);
+  const s = totalSec%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(milli).padStart(3,'0')}`;
+}
+function formatMsToVTT(ms){
+  ms = Math.max(0, ms);
+  const totalSec = Math.floor(ms/1000);
+  const milli = ms % 1000;
+  const h = Math.floor(totalSec/3600);
+  const m = Math.floor((totalSec%3600)/60);
+  const s = totalSec%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(milli).padStart(3,'0')}`;
+}
+
+// --- parsers ---
+function parseSRT(text){
+  const cues = [];
+  const blocks = text.trim().replace(/\r/g,'').split(/\n\s*\n/);
+  let id=1;
+  for(const block of blocks){
+    const lines = block.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+    if(lines.length<2) continue;
+    let idxLine=0;
+    // first line may be index number
+    if(/^\d+$/.test(lines[0])) idxLine=1;
+    const timeLine = lines[idxLine];
+    const m = timeLine.match(/(\d+:\d+:\d+[,\.]\d+|\d+:\d+[,\.]\d+)\s*-->\s*(\d+:\d+:\d+[,\.]\d+|\d+:\d+[,\.]\d+)/);
+    if(!m) continue;
+    const startMs = parseTimeToMs(m[1]);
+    const endMs = parseTimeToMs(m[2]);
+    const txt = lines.slice(idxLine+1).join('\n');
+    if(txt) cues.push({id:id++, startMs, endMs, text:txt});
+  }
+  return cues;
+}
+function parseVTT(text){
+  const cues = [];
+  // strip header and comments
+  let body = text.replace(/\r/g,'');
+  body = body.replace(/^WEBVTT.*\n/m, '');
+  body = body.replace(/^NOTE[\s\S]*?(?=\n\n)/gm, '');
+  body = body.replace(/^STYLE[\s\S]*?(?=\n\n)/gm, '');
+  const blocks = body.trim().split(/\n\s*\n/);
+  let id=1;
+  for(const block of blocks){
+    if(!block.trim()) continue;
+    const lines = block.split('\n');
+    let timeIdx=-1;
+    let timeMatch=null;
+    for(let i=0;i<lines.length;i++){
+      const mm = lines[i].match(/(\d+:\d+:\d+[,\.]\d+|\d+:\d+[,\.]\d+)\s*-->\s*(\d+:\d+:\d+[,\.]\d+|\d+:\d+[,\.]\d+)/);
+      if(mm){ timeIdx=i; timeMatch=mm; break; }
+    }
+    if(timeIdx===-1) continue;
+    const startMs = parseTimeToMs(timeMatch[1]);
+    const endMs = parseTimeToMs(timeMatch[2]);
+    const txt = lines.slice(timeIdx+1).join('\n').trim();
+    if(txt) cues.push({id:id++, startMs, endMs, text:txt});
+  }
+  return cues;
+}
+function detectAndParse(text){
+  const isVTT = /WEBVTT/i.test(text) || /\d+:\d+:\d+\.\d+\s*-->/.test(text);
+  const cues = isVTT ? parseVTT(text) : parseSRT(text);
+  return {cues, format: isVTT ? 'vtt' : 'srt'};
+}
+function formatCuesAsSRT(cues){
+  return cues.map((c,i)=>`${i+1}\n${formatMsToSRT(c.startMs)} --> ${formatMsToSRT(c.endMs)}\n${c.text}`).join('\n\n');
+}
+function formatCuesAsVTT(cues){
+  return 'WEBVTT\n\n' + cues.map(c=>`${formatMsToVTT(c.startMs)} --> ${formatMsToVTT(c.endMs)}\n${c.text}`).join('\n\n');
+}
+
+// --- UI render ---
+function renderFileList(){
+  fileListEl.innerHTML='';
+  filesData.forEach((f, idx)=>{
+    const div=document.createElement('div');
+    div.className='file-item';
+    div.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><span class="file-badge">${f.format.toUpperCase()}</span><strong>${f.name}</strong><span style="color:var(--muted)">· ${f.cues.length} cues</span></div><button class="icon-btn" aria-label="Remove">×</button>`;
+    div.querySelector('button').onclick=()=>{
+      filesData.splice(idx,1);
+      rebuildFromFiles();
+    };
+    fileListEl.appendChild(div);
+  });
+}
+function renderCues(){
+  cueListEl.innerHTML='';
+  cues.forEach((c, i)=>{
+    const row=document.createElement('div');
+    row.className='cue-row';
+    row.innerHTML=`
+      <div class="cue-index">${i+1}</div>
+      <input class="time-input" data-field="start" data-i="${i}" value="${formatMsToSRT(c.startMs).replace(',','.').substring(0,12)}" title="Start">
+      <input class="time-input" data-field="end" data-i="${i}" value="${formatMsToSRT(c.endMs).replace(',','.').substring(0,12)}" title="End">
+      <textarea class="cue-text" data-field="text" data-i="${i}">${c.text.replace(/</g,'&lt;')}</textarea>
+      <button class="icon-btn" data-del="${i}" title="Delete">🗑</button>
+    `;
+    cueListEl.appendChild(row);
+  });
+  // listeners
+  cueListEl.querySelectorAll('input.time-input').forEach(inp=>{
+    inp.addEventListener('change', (e)=>{
+      const i=parseInt(e.target.dataset.i);
+      const field=e.target.dataset.field;
+      const ms=parseTimeToMs(e.target.value);
+      if(field==='start') cues[i].startMs=Math.max(0,ms);
+      else cues[i].endMs=Math.max(cues[i].startMs+100, ms);
+      updateOutput();
+      updateStats();
+    });
+  });
+  cueListEl.querySelectorAll('textarea').forEach(ta=>{
+    ta.addEventListener('input', (e)=>{
+      const i=parseInt(e.target.dataset.i);
+      cues[i].text=e.target.value;
+      updateOutput();
+    });
+  });
+  cueListEl.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const i=parseInt(e.target.getAttribute('data-del'));
+      cues.splice(i,1);
+      renderCues(); updateOutput(); updateStats();
+    });
+  });
+}
+function updateOutput(){
+  const text = outputFormat==='srt' ? formatCuesAsSRT(cues) : formatCuesAsVTT(cues);
+  outputPreview.textContent = text || 'No cues yet';
+}
+function updateStats(){
+  if(!cues.length){ statsEl.style.display='none'; return; }
+  statsEl.style.display='flex';
+  const dur = cues.length ? (cues[cues.length-1].endMs - cues[0].startMs) : 0;
+  const durSec = Math.round(dur/1000);
+  statsEl.innerHTML=`<span class="stat">📄 ${cues.length} cues</span><span class="stat">⏱ ${Math.floor(durSec/60)}m ${durSec%60}s</span><span class="stat">🔤 ${outputFormat.toUpperCase()}</span><span class="stat">💾 ${(outputPreview.textContent.length/1024).toFixed(1)} KB</span>`;
+}
+
+function rebuildFromFiles(){
+  renderFileList();
+  if(filesData.length===0){
+    // keep cues if they exist from paste?
+    if(cues.length===0){
+      editorEl.style.display='none';
+      statsEl.style.display='none';
+      outputPreview.textContent='No cues yet';
+      return;
+    }
+  } else {
+    // default merge concat for initial build
+    cues = [];
+    let offset=0;
+    filesData.forEach(f=>{
+      if(cues.length>0){
+        const lastEnd = cues[cues.length-1].endMs;
+        offset = lastEnd + 0; // will adjust in merge modes later, but initial concat no gap
+        f.cues.forEach(cc=>{
+          cues.push({id:cues.length+1, startMs: cc.startMs + offset, endMs: cc.endMs + offset, text: cc.text});
+        });
+      } else {
+        f.cues.forEach(cc=>cues.push({...cc}));
+      }
+    });
+    cues.sort((a,b)=>a.startMs-b.startMs);
+  }
+  editorEl.style.display='block';
+  renderCues();
+  updateOutput();
+  updateStats();
+}
+
+// --- file handling ---
+function handleFiles(fileList){
+  const readers = [];
+  for(const file of fileList){
+    const reader = new FileReader();
+    readers.push(new Promise(res=>{
+      reader.onload=()=>{
+        const text = reader.result;
+        const {cues:parsed, format} = detectAndParse(text);
+        filesData.push({name:file.name, cues:parsed, format});
+        res();
+      };
+      reader.readAsText(file);
+    }));
+  }
+  Promise.all(readers).then(()=>{ rebuildFromFiles(); });
+}
+
+dropZone.addEventListener('click', ()=>fileInput.click());
+dropZone.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); fileInput.click(); } });
+dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e=>{
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e=>handleFiles(e.target.files));
+
+document.getElementById('btnPaste').addEventListener('click', ()=>{
+  const txt = pasteInput.value.trim();
+  if(!txt) return;
+  const {cues:parsed, format} = detectAndParse(txt);
+  filesData.push({name:`pasted.${format}`, cues:parsed, format});
+  rebuildFromFiles();
+});
+
+document.getElementById('btnExampleSRT').addEventListener('click', ()=>{
+  const ex = `1\n00:00:01,000 --> 00:00:03,500\nHello from JSM-Video.com 👋\n\n2\n00:00:04,000 --> 00:00:06,200\nThis is an example SRT file\n\n3\n00:00:07,000 --> 00:00:10,000\nYou can shift, merge, and convert it`;
+  pasteInput.value=ex;
+  const {cues:parsed, format} = detectAndParse(ex);
+  filesData=[{name:'example.srt', cues:parsed, format}];
+  rebuildFromFiles();
+});
+document.getElementById('btnExampleVTT').addEventListener('click', ()=>{
+  const ex = `WEBVTT\n\n00:00:01.000 --> 00:00:03.500\nHello from JSM-Video.com 👋\n\n00:00:04.000 --> 00:00:06.200\nThis is an example VTT file\n\n00:00:07.000 --> 00:00:10.000\nYou can shift, merge, and convert it`;
+  pasteInput.value=ex;
+  const {cues:parsed, format} = detectAndParse(ex);
+  filesData=[{name:'example.vtt', cues:parsed, format}];
+  rebuildFromFiles();
+});
+
+// --- tool tabs ---
+document.querySelectorAll('.tool-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tool-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tool-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tool-'+btn.dataset.tool).classList.add('active');
+  });
+});
+
+// --- convert ---
+document.getElementById('btnOutSRT').addEventListener('click', ()=>{ outputFormat='srt'; updateOutput(); updateStats(); });
+document.getElementById('btnOutVTT').addEventListener('click', ()=>{ outputFormat='vtt'; updateOutput(); updateStats(); });
+document.getElementById('btnCopy').addEventListener('click', async ()=>{
+  try{ await navigator.clipboard.writeText(outputPreview.textContent); document.getElementById('btnCopy').textContent='Copied!'; setTimeout(()=>document.getElementById('btnCopy').textContent='Copy',1200);}catch(e){ alert('Copy failed, select manually'); }
+});
+document.getElementById('btnDownload').addEventListener('click', doDownload);
+document.getElementById('btnAddCue').addEventListener('click', ()=>{
+  const last = cues[cues.length-1];
+  const start = last ? last.endMs + 500 : 0;
+  cues.push({id:cues.length+1, startMs:start, endMs:start+2000, text:'New subtitle'});
+  renderCues(); updateOutput(); updateStats();
+  cueListEl.scrollTop=cueListEl.scrollHeight;
+});
+document.getElementById('btnSort').addEventListener('click', ()=>{
+  cues.sort((a,b)=>a.startMs-b.startMs);
+  renderCues(); updateOutput();
+});
+function doDownload(){
+  if(!cues.length) return;
+  const text = outputFormat==='srt' ? formatCuesAsSRT(cues) : formatCuesAsVTT(cues);
+  const ext = outputFormat==='srt' ? 'srt' : 'vtt';
+  const name = (outNameInput.value.trim()||'subtitles') + '.' + ext;
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  try{ gtag('event', 'subtitle_download', {format: ext, cues: cues.length}); }catch(e){}
+}
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); doDownload(); }
+});
+
+// --- shift ---
+document.querySelectorAll('[data-shift]').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const delta = parseInt(b.dataset.shift);
+    document.getElementById('shiftMs').value = (parseInt(document.getElementById('shiftMs').value)||0) + delta;
+    syncMsSec('ms');
+  });
+});
+function syncMsSec(from){
+  const msEl=document.getElementById('shiftMs');
+  const secEl=document.getElementById('shiftSec');
+  if(from==='ms'){
+    secEl.value = (parseInt(msEl.value||0)/1000).toFixed(3);
+  } else {
+    msEl.value = Math.round(parseFloat(secEl.value||0)*1000);
+  }
+}
+document.getElementById('shiftMs').addEventListener('input', ()=>syncMsSec('ms'));
+document.getElementById('shiftSec').addEventListener('input', ()=>syncMsSec('sec'));
+document.getElementById('btnApplyShift').addEventListener('click', ()=>{
+  const offset = parseInt(document.getElementById('shiftMs').value)||0;
+  cues.forEach(c=>{ c.startMs=Math.max(0,c.startMs+offset); c.endMs=Math.max(c.startMs+200,c.endMs+offset); });
+  renderCues(); updateOutput(); updateStats();
+});
+document.getElementById('btnApplySpeed').addEventListener('click', ()=>{
+  const factor = parseFloat(document.getElementById('speedFactor').value)||1;
+  if(factor<=0) return alert('Factor must be >0');
+  const anchor = cues[0]?.startMs||0;
+  cues.forEach(c=>{
+    c.startMs = Math.max(0, anchor + (c.startMs-anchor)*factor);
+    c.endMs = Math.max(c.startMs+200, anchor + (c.endMs-anchor)*factor);
+  });
+  renderCues(); updateOutput(); updateStats();
+});
+document.getElementById('btnSyncFirst').addEventListener('click', ()=>{
+  const targetStr = document.getElementById('firstCueTarget').value.trim();
+  if(!targetStr || !cues.length) return;
+  const targetMs = parseTimeToMs(targetStr);
+  const delta = targetMs - cues[0].startMs;
+  cues.forEach(c=>{ c.startMs=Math.max(0,c.startMs+delta); c.endMs=Math.max(c.startMs+200,c.endMs+delta); });
+  renderCues(); updateOutput(); updateStats();
+});
+
+// --- merge ---
+document.getElementById('btnDoMerge').addEventListener('click', ()=>{
+  if(filesData.length<2){ alert('Load at least 2 files to merge'); return; }
+  const mode = document.querySelector('input[name="mergeMode"]:checked')?.value||'concat';
+  let newCues=[];
+  if(mode==='sort'){
+    filesData.forEach(f=>newCues.push(...f.cues.map(c=>({...c}))));
+    newCues.sort((a,b)=>a.startMs-b.startMs);
+  } else {
+    let offset=0;
+    let gap = mode==='gap'?1000:0;
+    filesData.forEach((f, idx)=>{
+      if(idx>0){
+        const lastEnd = newCues[newCues.length-1]?.endMs||0;
+        offset = lastEnd + gap;
+      }
+      f.cues.forEach(c=>{
+        newCues.push({id:newCues.length+1, startMs:c.startMs+offset, endMs:c.endMs+offset, text:c.text});
+      });
+    });
+  }
+  cues=newCues.map((c,i)=>({id:i+1, startMs:c.startMs, endMs:c.endMs, text:c.text}));
+  renderCues(); updateOutput(); updateStats();
+});
+
+// --- clean ---
+document.getElementById('btnRemoveHTML').addEventListener('click', ()=>{
+  cues.forEach(c=>{ c.text = c.text.replace(/<\/?[^>]+>/g,'').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'); });
+  renderCues(); updateOutput();
+});
+document.getElementById('btnRemoveBrackets').addEventListener('click', ()=>{
+  cues.forEach(c=>{ c.text = c.text.replace(/\[.*?\]/g,'').replace(/\(.*?(music|laughs|applause|inaudible).*?\)/gi,'').trim(); });
+  cues = cues.filter(c=>c.text.trim().length>0);
+  renderCues(); updateOutput(); updateStats();
+});
+document.getElementById('btnTrim').addEventListener('click', ()=>{
+  cues.forEach(c=>{ c.text = c.text.split('\n').map(l=>l.trim()).join('\n').trim(); });
+  renderCues(); updateOutput();
+});
+document.getElementById('btnDedup').addEventListener('click', ()=>{
+  const seen=new Set();
+  cues = cues.filter(c=>{
+    const key = `${c.startMs}-${c.text}`;
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+  renderCues(); updateOutput(); updateStats();
+});
+document.getElementById('btnFixOverlap').addEventListener('click', ()=>{
+  cues.sort((a,b)=>a.startMs-b.startMs);
+  for(let i=0;i<cues.length-1;i++){
+    if(cues[i].endMs > cues[i+1].startMs){
+      cues[i].endMs = Math.max(cues[i].startMs+200, cues[i+1].startMs - 100);
+    }
+  }
+  renderCues(); updateOutput();
+});
+document.getElementById('btnRenumber').addEventListener('click', ()=>{
+  cues.forEach((c,i)=>c.id=i+1);
+  renderCues(); updateOutput();
+});
+
+function rebuildFromFilesWrapper(){ rebuildFromFiles(); }
+</script>
+</body>
+</html>
