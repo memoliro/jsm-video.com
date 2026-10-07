@@ -463,6 +463,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Do you store my files?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. There is no server storage because there is no upload. Your file lives in your browser tab's memory and is gone when you close the tab."}},
+    {"@type": "Question", "name": "Can you see what I convert?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Conversions happen in your browser; our servers never receive your file, its name, or its metadata."}},
+    {"@type": "Question", "name": "What about the 30MB engine download?",
+     "acceptedAnswer": {"@type": "Answer", "text": "That's ffmpeg.wasm fetched once from a CDN and cached — it contains code, not your data, and runs locally."}},
+    {"@type": "Question", "name": "Is browser conversion safe for client work under NDA?",
+     "acceptedAnswer": {"@type": "Answer", "text": "It's the safest practical option short of air-gapped desktop software. No third party ever holds the file."}},
+    {"@type": "Question", "name": "Why do other converters offer accounts and history?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Their business model needs your files on their servers. A local tool has nothing to store, so there's nothing to make an account for."}},
+    {"@type": "Question", "name": "Does private mode work offline?",
+     "acceptedAnswer": {"@type": "Answer", "text": "After the first visit caches the engine, yes — the ultimate proof nothing uploads."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -524,7 +546,51 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 </ol>
 <p>Private conversion is not a marketing badge. It is an architecture choice: no upload endpoint exists. That's how JSM-Video.com is built.</p>
 
-    <div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
+    
+<h2>What server-side converters actually do with your file</h2>
+<p>The typical flow: your browser POSTs the file to an API endpoint, the server writes it to disk (often on object storage like S3), a worker process converts it, the result is served back for download, and a cleanup job deletes the originals "within 24 hours" or "immediately." Every one of those stages is a privacy surface:</p>
+<ul>
+<li><b>Upload logs:</b> Web servers log filenames, sizes, timestamps, and your IP by default. Those logs get backed up.</li>
+<li><b>Object storage:</b> "Deleted" files on cloud storage often persist in version history or backups the provider controls, not the converter site.</li>
+<li><b>Analytics and ads:</b> Most free converters run ad networks and analytics that fingerprint your browser and log what you converted.</li>
+<li><b>Employee access:</b> Someone at the company can open your file. There is no technical barrier — only policy.</li>
+<li><b>Legal compulsion:</b> Stored files can be subpoenaed. Files that never left your device cannot.</li>
+</ul>
+
+<h2>GDPR and professional obligations</h2>
+<p>If you handle other people's data, uploading it to a random converter may breach your obligations. Under GDPR, sending personal data (faces and voices count) to a third-party processor requires a data processing agreement — which no free converter offers. Lawyers, healthcare workers, HR departments, and videographers under NDA all have professional duties that server-side conversion quietly violates. Browser-local conversion sidesteps the entire question: no transfer, no processor, no breach.</p>
+
+<h2>How to verify a tool is truly private</h2>
+<p>Don't take marketing copy at face value. Verify in 30 seconds:</p>
+<ol>
+<li>Open your browser's DevTools (F12) → Network tab.</li>
+<li>Drop a video into the converter and run a conversion.</li>
+<li>Watch for POST or PUT requests carrying megabytes. A truly local tool shows only the initial engine download (~30MB, once, cached) and zero upload traffic.</li>
+<li>Bonus: disconnect from Wi-Fi mid-conversion. If it keeps working, nothing was ever leaving your device.</li>
+</ol>
+<p>JSM-Video.com passes all of these by construction — there is literally no upload endpoint in the codebase to send your file to.</p>
+
+<h2>The performance myth</h2>
+<p>"But servers are faster, right?" Sometimes — a 64-core cloud machine beats a laptop. But you're forgetting the upload: pushing a 500MB file up a 10 Mbps home connection takes nearly 7 minutes before conversion even starts. Local conversion starts instantly. For files under a few hundred megabytes, local usually wins on total wall-clock time. And for the WebM/GPU path, your graphics chip is genuinely faster than most server CPUs anyway.</p>
+
+<h2>What private conversion can't protect against</h2>
+<p>Honesty matters: local conversion protects your file in transit and at rest on someone else's infrastructure. It doesn't protect against malware already on your device, a compromised browser extension reading your downloads, or someone looking over your shoulder. Privacy is layers — local conversion removes the biggest, most unnecessary layer of exposure (uploading to strangers), but keep your device itself secure too.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Do you store my files?</h3>
+<p>No. There is no server storage because there is no upload. Your file lives in your browser tab's memory and is gone when you close the tab.</p>
+<h3>Can you see what I convert?</h3>
+<p>No. Conversions happen in your browser; our servers never receive your file, its name, or its metadata. We can't see what we never receive.</p>
+<h3>What about the 30MB engine download?</h3>
+<p>That's ffmpeg.wasm (the conversion engine) fetched once from a CDN and cached by your browser — the same way any website loads a JavaScript library. It contains code, not your data, and it runs locally.</p>
+<h3>Is browser conversion safe for client work under NDA?</h3>
+<p>It's the safest practical option short of air-gapped desktop software. No third party ever holds the file, which is exactly what most NDAs require. When in doubt, check with your client's security policy — but "never uploaded anywhere" is usually the easiest answer to defend.</p>
+<h3>Why do other converters offer accounts and history?</h3>
+<p>Because their business model needs your files on their servers — conversion history, re-downloads, and "cloud storage" are features built on keeping your data. A local tool has nothing to store, so there's nothing to make an account for.</p>
+<h3>Does private mode work offline?</h3>
+<p>After the first visit (which caches the engine), yes. Drop a file with no connection and conversion proceeds normally — the ultimate proof nothing uploads.</p>
+
+<div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
     <p style="margin-top:22px"><a href="/#articles" style="color:var(--primary);text-decoration:none">← Back to all guides</a></p>
   </div>
 </main>

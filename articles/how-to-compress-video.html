@@ -463,6 +463,26 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Will compressing my video make it look bad?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Not if you stay in the CRF 23-26 range. Most viewers can't distinguish a CRF 23 encode from the original on typical screens."}},
+    {"@type": "Question", "name": "Why is my compressed file still too big?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Usually the source was 4K (downscale to 1080p), the video is long (trim it), or the content is hard to compress. Try CRF 28 + 720p + no audio."}},
+    {"@type": "Question", "name": "Does compressing twice hurt quality?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. Always compress from the original file, not from an already-compressed copy."}},
+    {"@type": "Question", "name": "What's the best format for the smallest file?",
+     "acceptedAnswer": {"@type": "Answer", "text": "MP4 with H.264 video and AAC audio at 720p, CRF 28, 96k audio — plays everywhere and squeezes the most out of every megabyte."}},
+    {"@type": "Question", "name": "Can I compress without losing any quality?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Lossless compression barely shrinks video files. Aim for 'smaller with invisible difference' at CRF 18-20 instead."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -526,7 +546,47 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <h2>Privacy advantage</h2>
 <p>Compressing on a server means uploading the full large original. Our tool compresses locally - the large file never leaves your device, only the small compressed result is saved by you.</p>
 
-    <div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
+    
+<h2>Understanding CRF: the quality dial that matters most</h2>
+<p>CRF (Constant Rate Factor) is the single most important compression setting. It works on a scale from 0 to 51, where lower means better quality and larger files. Unlike picking a fixed bitrate, CRF adjusts itself scene by scene — simple scenes get fewer bits, complex action scenes get more. That's why two videos at CRF 23 can have very different file sizes but look equally good.</p>
+<ul>
+<li><b>CRF 18-20:</b> Visually lossless. Use for masters you plan to edit later. Files stay large.</li>
+<li><b>CRF 21-24:</b> The sweet spot for most sharing. CRF 23 is the x264 default for a reason — most people can't tell it from the original on a phone or laptop screen.</li>
+<li><b>CRF 25-28:</b> Aggressive compression. Fine for quick shares, previews, and messaging apps that will recompress anyway. Expect slight softness in dark or fast-moving scenes.</li>
+<li><b>CRF 29+:</b> Only for extreme size targets. Noticeable blocking and banding.</li>
+</ul>
+<p>JSM-Video.com maps its Speed presets to CRF values: Fast uses CRF 28, Balanced uses CRF 23, and Quality uses CRF 20. If your file is still too big at Balanced, switch to Fast before touching resolution — CRF is usually the bigger lever.</p>
+
+<h2>Resolution vs bitrate: which should you cut first?</h2>
+<p>When a file is too big, beginners usually slash resolution first. That's often the wrong move. A 1080p video at CRF 28 frequently looks better than a 720p video at CRF 20 at the same file size, because CRF 28 at full resolution preserves detail while the encoder spends bits efficiently.</p>
+<p>The right order of operations:</p>
+<ol>
+<li><b>Raise CRF first</b> (23 → 26 → 28). Each step up saves roughly 30-40% file size.</li>
+<li><b>Then reduce resolution</b> if still too big. 4K → 1080p saves about 60-75%.</li>
+<li><b>Then trim audio</b> — drop to 96k or remove entirely for another 5-15%.</li>
+<li><b>Last resort: trim the video itself.</b> Cutting 30 seconds off a clip saves more than any setting.</li>
+</ol>
+
+<h2>Codec choices: H.264 vs H.265 vs VP9</h2>
+<p>H.264 (AVC) is the universal choice — every phone, browser, and TV from the last 15 years plays it. H.265 (HEVC) compresses 25-50% better at the same quality but needs more CPU to encode and doesn't play on older devices. VP9 (Google's codec) matches H.265 efficiency and plays in browsers, but iPhones only added support recently.</p>
+<p>For maximum compatibility, stick with H.264. That's what JSM-Video.com's "MP4 Universal" preset uses. Only reach for H.265 when you're archiving and every megabyte counts, and you know the playback device supports it.</p>
+
+<h2>Two-pass encoding vs CRF: when it matters</h2>
+<p>Two-pass encoding analyzes the whole video first, then encodes it to hit an exact target file size. It's the right tool when you need precisely 24.9MB for an email attachment. CRF can't promise an exact size — it promises consistent quality instead. For most sharing, CRF is simpler and looks better. Use two-pass only when a hard size cap leaves no margin.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Will compressing my video make it look bad?</h3>
+<p>Not if you stay in the CRF 23-26 range. Most viewers can't distinguish a CRF 23 encode from the original on typical screens. Quality loss becomes visible around CRF 28+ in dark scenes or fast motion.</p>
+<h3>Why is my compressed file still too big?</h3>
+<p>Three usual causes: the source was 4K (downscale to 1080p), the video is long (trim it), or the content is hard to compress (grainy footage, confetti, water). Try CRF 28 + 720p + no audio as the aggressive combo.</p>
+<h3>Does compressing twice hurt quality?</h3>
+<p>Yes — every re-encode loses a little. Always compress from the original file, not from an already-compressed copy. If WhatsApp already compressed your video, don't compress it again for Discord; go back to the original.</p>
+<h3>What's the best format for the smallest file?</h3>
+<p>MP4 with H.264 video and AAC audio at 720p, CRF 28, 96k audio. That combination plays everywhere and squeezes the most out of every megabyte.</p>
+<h3>Can I compress without losing any quality?</h3>
+<p>Lossless compression (CRF 0 or FFV1) barely shrinks video files — often just 10-30%. Video is already heavily compressed by the camera. "Smaller with identical quality" isn't realistic; aim for "smaller with invisible difference" at CRF 18-20.</p>
+
+<div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
     <p style="margin-top:22px"><a href="/#articles" style="color:var(--primary);text-decoration:none">← Back to all guides</a></p>
   </div>
 </main>

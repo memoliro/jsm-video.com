@@ -462,6 +462,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Can I just rename .mov to .mp4?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Sometimes it plays, but it's unreliable. A proper remux takes seconds and writes a valid MP4 — always remux instead of renaming."}},
+    {"@type": "Question", "name": "Why is my GIF 50MB?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Too long, too big, or too many fps. Keep GIFs under 6 seconds, 480px wide, 10-12 fps — or use a muted MP4 instead."}},
+    {"@type": "Question", "name": "Does converting MOV to MP4 lose quality?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Not when both contain H.264 — it's a stream copy, bit-for-bit identical."}},
+    {"@type": "Question", "name": "What about AVI, WMV, MKV, FLV?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Convert AVI/WMV/FLV to MP4 for sharing. MKV is excellent but less compatible with Apple devices and social platforms."}},
+    {"@type": "Question", "name": "Which format is best for archiving?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Keep original camera files. For compressed storage, MKV or MP4 with H.265 at CRF 20-22."}},
+    {"@type": "Question", "name": "Do I need audio in a GIF?",
+     "acceptedAnswer": {"@type": "Answer", "text": "GIFs cannot contain audio. If your clip needs sound, use MP4 instead."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -510,7 +532,46 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <h2>Private conversion note</h2>
 <p>Converting MOV to MP4 or MP4 to GIF can be done entirely in your browser. Your source MOV from iPhone never needs to leave your phone. Drop it in JSM-Video.com, choose target, and download.</p>
 
-    <div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
+    
+<h2>Containers vs codecs: the distinction that explains everything</h2>
+<p>MP4 and MOV are <b>containers</b> — boxes that hold video, audio, subtitles, and metadata. H.264, H.265, and ProRes are <b>codecs</b> — the actual compression math. A single MP4 file might contain H.264 video + AAC audio, while a MOV might contain the exact same H.264 video + AAC audio. The picture quality is identical; only the box differs. This is why MOV-to-MP4 conversion is often instant: the tool just repackages the same streams into a new box.</p>
+<p>GIF is neither — it's an image format that happens to support animation. No video codec, no audio, just a sequence of 256-color images. Understanding this explains every GIF limitation: the huge files (no real video compression), the missing sound (no audio track support), and the color banding (256 colors total).</p>
+
+<h2>WebM: the fourth option worth knowing</h2>
+<p>WebM (usually VP9 video + Opus audio) is Google's open alternative to MP4. It compresses about 20-30% better than H.264 at the same quality and plays natively in Chrome, Firefox, and Edge. The catch: Safari only added WebM support recently, and many phones and TVs still prefer MP4. Use WebM for web embeds where you control the audience's browsers; use MP4 when the file might travel anywhere.</p>
+
+<h2>Platform-by-platform recommendations</h2>
+<ul>
+<li><b>YouTube / Vimeo upload:</b> MP4 with H.264. The platforms re-encode everything anyway — give them a clean, compatible master.</li>
+<li><b>Instagram / TikTok:</b> MP4, H.264, AAC audio. Vertical 1080x1920 for reels. Keep under platform size limits by compressing first.</li>
+<li><b>Discord / Slack:</b> MP4 for clips (small, has sound), GIF only for sub-6-second reactions. Remember free Discord caps at 8-25MB.</li>
+<li><b>Email attachment:</b> MP4, 720p, compressed under 25MB. Never send MOV — many corporate email filters and Windows machines handle it poorly.</li>
+<li><b>Website hero background:</b> Muted MP4 (or WebM) — autoplays everywhere, unlike GIF which can't be controlled or paused accessibly.</li>
+<li><b>Video editing:</b> Keep the original MOV/ProRes master. Edit in high quality, export MP4 only for delivery.</li>
+<li><b>PowerPoint / Keynote:</b> MP4. PowerPoint on Windows famously chokes on MOV files.</li>
+</ul>
+
+<h2>The GIF quality trap</h2>
+<p>GIFs look bad for two technical reasons: 256 colors (gradients turn into visible bands) and no temporal compression (every frame is stored almost fully, unlike video codecs that store only changes between frames). A 10-second 480p GIF can easily hit 15MB while the same clip as muted MP4 is 1.5MB and looks dramatically better. The modern best practice: use muted, looping MP4s (<code>&lt;video autoplay muted loop playsinline&gt;</code>) instead of GIFs on websites. You keep the auto-playing behavior with a tenth of the bandwidth.</p>
+
+<h2>When MOV is actually the right choice</h2>
+<p>MOV isn't obsolete — it has legitimate uses. ProRes in a MOV container is the editing industry's intermediate standard: huge files, but every frame is independently decodable, which makes scrubbing and cutting instant. If you're passing footage to an editor, sending ProRes MOV on a hard drive is correct. MOV also supports alpha transparency (ProRes 4444), which MP4 with H.264 cannot do — essential for motion graphics overlays. Just don't use MOV as a delivery format.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Can I just rename .mov to .mp4?</h3>
+<p>Sometimes it plays, but it's unreliable — the container structures differ, so browsers, phones, and editors may reject it. A proper remux takes seconds and writes a valid MP4. Always remux instead of renaming.</p>
+<h3>Why is my GIF 50MB?</h3>
+<p>Too long, too big, or too many frames per second. Keep GIFs under 6 seconds, 480px wide, 10-12 fps. If it still won't fit, use a muted MP4 instead — 5-10x smaller.</p>
+<h3>Does converting MOV to MP4 lose quality?</h3>
+<p>Not when both contain H.264 — it's a stream copy, bit-for-bit identical. Quality loss only happens if the MOV uses ProRes or HEVC and must be re-encoded.</p>
+<h3>What about AVI, WMV, MKV, FLV?</h3>
+<p>AVI and WMV are legacy Windows formats — convert to MP4 for sharing. MKV is an excellent container (better subtitle support than MP4) but less compatible with Apple devices and social platforms. FLV is dead; convert anything in FLV to MP4 immediately.</p>
+<h3>Which format is best for archiving?</h3>
+<p>Keep your original camera files as the archive. If you must compress for storage, MKV or MP4 with H.265 at CRF 20-22 gives the best quality per gigabyte. Keep a checksum so you can verify integrity years later.</p>
+<h3>Do I need audio in a GIF?</h3>
+<p>GIFs cannot contain audio, full stop. If your clip needs sound, it's not a GIF use case — use MP4.</p>
+
+<div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
     <p style="margin-top:22px"><a href="/#articles" style="color:var(--primary);text-decoration:none">← Back to all guides</a></p>
   </div>
 </main>

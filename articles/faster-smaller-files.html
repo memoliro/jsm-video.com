@@ -464,6 +464,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Why is my conversion stuck at 0%?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Usually the engine is still loading (first visit downloads ~30MB). Wait for the green 'Engine ready' banner, or hard-refresh if wedged."}},
+    {"@type": "Question", "name": "Does a faster computer help?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Enormously. Encoding scales with CPU cores and clock speed. GPU via MediaRecorder helps even more for supported conversions."}},
+    {"@type": "Question", "name": "Why is WebM conversion so much faster than MP4?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The WebM path uses your GPU hardware encoder instead of software FFmpeg."}},
+    {"@type": "Question", "name": "Can I convert while doing other work?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes, but encoding slows as it competes for CPU. Light browsing is fine; gaming or video calls can double conversion time."}},
+    {"@type": "Question", "name": "Do I need to keep the tab in focus?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes — browsers throttle background tabs. Keep the converter tab visible or it may slow to a crawl."}},
+    {"@type": "Question", "name": "What's the absolute fastest way to shrink a video?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Downscale to 720p + Fast preset + remove audio via MP4 Universal. Hits every lever at once."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -514,7 +536,52 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <h3>Example workflow for a 162MB file like yours</h3>
 <p>Your Haydi-don-flamenko video at 162MB is ideal. Choose MP4 Universal, Resolution Original, Speed Fast for a quick share, or Quality for final archive. Conversion should take 30-60 seconds on a modern laptop with multi-thread enabled.</p>
 
-    <div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
+    
+<h2>Understanding x264 presets: what "Speed" actually changes</h2>
+<p>When you pick Fast, Balanced, or Quality, you're choosing an <b>encoding preset</b> — a bundle of dozens of internal decisions the encoder makes about how hard to look for compression opportunities. The preset names (ultrafast, veryfast, medium, slow) control how thoroughly x264 searches for redundant patterns between frames.</p>
+<ul>
+<li><b>Ultrafast:</b> Minimal searching. Encodes fast but needs ~30-40% more bits for the same quality as medium. Good for drafts.</li>
+<li><b>Veryfast:</b> The sweet spot — most of medium's quality at a fraction of the time. Our Balanced default.</li>
+<li><b>Medium:</b> The x264 default. Noticeably slower than veryfast, modest quality gain.</li>
+<li><b>Slow / slower:</b> Diminishing returns for huge time costs. Only worth it for final archives you'll keep for years.</li>
+</ul>
+<p>Key insight: preset and CRF are independent dials. CRF 23 at ultrafast looks worse than CRF 23 at medium, but the file sizes differ too. For the best size-to-quality ratio in reasonable time, pair a moderate CRF (23-26) with veryfast or faster.</p>
+
+<h2>Multi-threading: using all your CPU cores</h2>
+<p>Video encoding parallelizes beautifully — different frames can be encoded simultaneously. ffmpeg.wasm in JSM-Video.com enables multi-threaded mode when your browser supports <code>crossOriginIsolated</code> (Chrome and Edge do by default on this site). On an 8-core laptop, that's roughly a 4-6x speedup over single-threaded. If your conversions feel slow, check the engine banner: "Multi-threaded acceleration active" means you're getting full speed. Firefox and Safari may fall back to fewer threads due to stricter SharedArrayBuffer policies.</p>
+
+<h2>Hardware acceleration via MediaRecorder</h2>
+<p>For MP4-to-WebM conversion, we skip FFmpeg entirely and use your GPU through the MediaRecorder API. Your graphics chip encodes video in dedicated silicon — 3-5x faster than even multi-threaded WASM, with no 30MB engine download. The trade-off: less control over exact settings (no CRF dial, just bitrate targets). It's the right choice when speed matters more than squeezing the last 5% of efficiency.</p>
+
+<h2>Memory limits: why big files fail in browsers</h2>
+<p>Browsers cap how much RAM a single tab can use — typically 2-4GB depending on device. FFmpeg needs roughly 2-3x the file size in working memory during conversion (input buffer + decoded frames + output buffer). That's why a 1GB 4K file can crash a tab with 4GB of system RAM, while the same file at 1080p converts fine. Practical rules:</p>
+<ul>
+<li><b>Under 500MB:</b> Smooth sailing on any modern device.</li>
+<li><b>500MB - 1GB:</b> Works on desktops; close other tabs first. Mobile browsers may struggle.</li>
+<li><b>Over 1GB:</b> Split the file or downscale first. Desktop FFmpeg (installed locally) has no such limits.</li>
+</ul>
+
+<h2>Batch processing efficiently</h2>
+<p>Converting 10 files? Order matters. Convert the smallest files first to warm up the engine (it's cached after first use), and keep output settings identical across the batch so you can use "Convert all." Avoid mixing 4K masters and phone clips in one batch with one setting — the 4K files will dominate total time. Split by resolution: do all 1080p files at one setting, then handle the 4K ones separately.</p>
+
+<h2>Network is not the bottleneck (but it feels like it)</h2>
+<p>Because nothing uploads, your internet speed is irrelevant to conversion time — a nice side effect of local processing. The 30MB engine downloads once and caches. After that, you can literally disconnect from Wi-Fi mid-conversion and it keeps working. If the first load feels slow on a weak connection, that's the only network-dependent moment.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Why is my conversion stuck at 0%?</h3>
+<p>Usually the engine is still loading (first visit downloads ~30MB). Wait for the green "Engine ready" banner. If it stays stuck, hard-refresh — a partial engine download can wedge the worker.</p>
+<h3>Does a faster computer help?</h3>
+<p>Enormously. Encoding scales with CPU cores and clock speed. An M-series Mac or recent Ryzen finishes in a fraction of the time of a 5-year-old dual-core laptop. GPU via MediaRecorder helps even more for supported conversions.</p>
+<h3>Why is WebM conversion so much faster than MP4?</h3>
+<p>Our WebM path uses your GPU hardware encoder instead of software FFmpeg. Different engine, different speed — that's the whole story.</p>
+<h3>Can I convert while doing other work?</h3>
+<p>Yes, but encoding will slow down as it competes for CPU. Heavy tasks (gaming, video calls, another encode) can double conversion time. Light browsing is fine.</p>
+<h3>Do I need to keep the tab in focus?</h3>
+<p>Browsers throttle background tabs' timers and workers. Keep the converter tab visible — minimized or hidden tabs can slow to a crawl or pause entirely on some browsers.</p>
+<h3>What's the absolute fastest way to shrink a video?</h3>
+<p>Downscale to 720p + Fast preset + remove audio, via the MP4 Universal output. That combination hits every lever at once and usually finishes in under a minute for typical clips.</p>
+
+<div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
     <p style="margin-top:22px"><a href="/#articles" style="color:var(--primary);text-decoration:none">← Back to all guides</a></p>
   </div>
 </main>

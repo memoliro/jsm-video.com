@@ -463,6 +463,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Will converting MOV to MP4 reduce quality?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Not when the MOV contains H.264 — the tool copies the stream untouched. Re-encoding for HEVC/ProRes sources at CRF 23 is visually transparent."}},
+    {"@type": "Question", "name": "Why won't my MOV play on Windows?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Windows Media Player and many Windows apps lack MOV container support. Converting to MP4 fixes it permanently."}},
+    {"@type": "Question", "name": "Can I convert MOV to MP4 on my iPhone directly?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes — the converter runs in mobile Safari and Chrome. Everything stays on your phone."}},
+    {"@type": "Question", "name": "What's the difference between MP4 and M4V?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Almost nothing — M4V is Apple's name for MP4 files. For your own footage, MP4 is the interoperable choice."}},
+    {"@type": "Question", "name": "My converted MP4 has no sound — what happened?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Some MOVs use unusual audio tracks. Re-run with a full re-encode and the audio will convert to AAC properly."}},
+    {"@type": "Question", "name": "Should I delete the MOV after converting?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Keep it if it's your only copy of something irreplaceable. Delete only duplicates after verifying the MP4."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -510,6 +532,45 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <li><b>HEVC/H.265 iPhone video:</b> converts fine, just slower, since it must re-encode to H.264.</li>
 <li><b>Video plays sideways after conversion:</b> use the Rotate control before converting.</li>
 </ul>
+
+
+<h2>Understanding what's inside your MOV file</h2>
+<p>Before converting, it helps to know what you're working with. iPhones record MOV files with different codecs depending on settings:</p>
+<ul>
+<li><b>H.264 + AAC (most common):</b> Default on older iPhones and most Android phones shooting MOV. Converts to MP4 via instant remux — seconds, zero quality loss.</li>
+<li><b>HEVC/H.265 + AAC (iPhone "High Efficiency" mode):</b> Newer iPhones default to this. Better compression, but MP4 players on older devices may not handle H.265 — so conversion re-encodes to H.264. Slower, tiny quality cost.</li>
+<li><b>ProRes (iPhone Pro models, "ProRes" toggle):</b> Enormous files, editing-grade quality. Always needs full re-encode to H.264 for sharing.</li>
+</ul>
+<p>You can check which you have: on Mac, open in QuickTime → Window → Show Movie Inspector. On Windows, MediaInfo (free) shows the codec in one glance.</p>
+
+<h2>Remux vs re-encode: what the tool chooses and why</h2>
+<p>When you drop a MOV into JSM-Video.com, it first inspects the streams. If it finds H.264 video and AAC audio, it performs a <b>stream copy</b> (ffmpeg <code>-c copy</code>): the compressed data is lifted out of the MOV container and placed into an MP4 container untouched. A 200MB file converts in under 10 seconds with bit-for-bit identical quality.</p>
+<p>If it finds HEVC, ProRes, or anything exotic, it falls back to re-encoding with H.264 at the Balanced preset (CRF 23). A 2-minute 4K HEVC clip might take 2-4 minutes on a laptop. The quality loss at CRF 23 is invisible in normal viewing — but keep your original MOV as the master if you plan to edit later.</p>
+
+<h2>Settings that matter for MOV conversion</h2>
+<ul>
+<li><b>Output: MP4 Universal</b> — H.264 + AAC, plays everywhere. Don't pick WebM for iPhone footage unless you specifically need it for web.</li>
+<li><b>Resolution: keep Original</b> unless you need a smaller file. Downscaling iPhone 4K to 1080p is the biggest size lever if the remuxed file is still too large to send.</li>
+<li><b>Rotate:</b> iPhone videos store orientation as metadata, not baked-in pixels. Some Windows players ignore the metadata flag and show video sideways. If that happens, use the Rotate control during conversion — it bakes the rotation into the pixels permanently.</li>
+<li><b>Date metadata:</b> Conversion preserves the creation date in most cases, so your Photos library stays sorted.</li>
+</ul>
+
+<h2>Batch converting an iPhone camera roll</h2>
+<p>After a trip you might have 40 MOV clips. Select up to 10 at a time in the converter — each gets its own card. Use the <b>MOV → MP4</b> shortcut under Popular conversions to set the output on all cards at once, then <b>Convert all</b>. Files process sequentially; a batch of ten 1-minute clips typically finishes in 2-5 minutes since most remux instantly. Download each (or use your browser's multi-download) and you're done.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Will converting MOV to MP4 reduce quality?</h3>
+<p>Not when the MOV contains H.264 — the tool copies the stream untouched. Re-encoding (for HEVC/ProRes sources) at CRF 23 is visually transparent.</p>
+<h3>Why won't my MOV play on Windows?</h3>
+<p>Windows Media Player and many Windows apps lack MOV container support, even when the video codec inside is fine. Converting to MP4 fixes it permanently.</p>
+<h3>Can I convert MOV to MP4 on my iPhone directly?</h3>
+<p>Yes — JSM-Video.com runs in mobile Safari and Chrome. Drop the MOV from your Files app, convert, and save back. Everything stays on your phone.</p>
+<h3>What's the difference between MP4 and M4V?</h3>
+<p>Almost nothing — M4V is Apple's name for MP4 files, sometimes with DRM on iTunes purchases. For your own footage, MP4 is the interoperable choice.</p>
+<h3>My converted MP4 has no sound — what happened?</h3>
+<p>Rare, but some MOVs use PCM or ALAC audio which remuxes fine, while others have an unusual track the copy step skips. Re-run with a full re-encode (change any setting, e.g. resolution) and the audio will be converted to AAC properly.</p>
+<h3>Should I delete the MOV after converting?</h3>
+<p>Keep it if it's your only copy of something irreplaceable — the MOV is your master. Delete only duplicates once you've verified the MP4 plays correctly everywhere you need it.</p>
 
 <p><a href="/" class="btn btn-blue" style="display:inline-flex;margin-top:8px">Convert MOV to MP4 now →</a></p>
 </main>

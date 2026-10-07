@@ -462,6 +462,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Is removing audio reversible?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No — the output file has no audio track. Keep your original if you might want the sound back later."}},
+    {"@type": "Question", "name": "Why did my file barely shrink after removing audio?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The source likely had a low-bitrate audio track. Removal saves most on files with high-quality or surround audio."}},
+    {"@type": "Question", "name": "Can I remove audio from only part of a video?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Not in one click. Split the video, mute the section, and rejoin — or trim the unwanted section out entirely."}},
+    {"@type": "Question", "name": "Does removing audio affect video quality?",
+     "acceptedAnswer": {"@type": "Answer", "text": "With remux (stream copy), zero effect. With re-encode, only the normal tiny cost of re-encoding."}},
+    {"@type": "Question", "name": "Which formats support the instant remux method?",
+     "acceptedAnswer": {"@type": "Answer", "text": "MP4 to MP4 and MOV to MP4 remux instantly. Cross-format conversions always need a full re-encode."}},
+    {"@type": "Question", "name": "Can I remove just one audio language and keep another?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The quick toggle strips all audio tracks. For selective removal use desktop FFmpeg with -map stream selection."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -519,7 +541,44 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <li>Converting to GIF automatically removes audio, but file will be larger. Better remove audio first, then decide if GIF needed.</li>
 </ul>
 
-    <div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
+    
+<h2>Remux vs re-encode: why the distinction matters</h2>
+<p>Removing audio the <b>fast way</b> (remux) copies the video stream untouched into a new file without the audio track. It's instant — a 500MB file finishes in seconds — and quality is bit-for-bit identical because the video data is never decoded. The catch: it only works when you're not changing anything else. Same container in, same container out, no rotation, no resize.</p>
+<p>The <b>full re-encode</b> decodes and re-compresses the video. It's slower (minutes, not seconds) and technically loses a tiny amount of quality, but it's required whenever you also rotate, resize, change format, or trim. JSM-Video.com picks automatically: if you only check "Remove audio" and keep MP4 output, you get the instant remux. Touch any other setting and it switches to re-encode.</p>
+
+<h2>How much size do you actually save?</h2>
+<p>It depends on the source. A phone recording with 128k AAC stereo audio saves roughly 1MB per minute. A movie rip with 5.1 surround at 640k saves about 5MB per minute — on a 2-hour film that's 600MB. Screen recordings with minimal audio save almost nothing. As a rule of thumb: audio is 5-20% of a typical file. Worth removing when every megabyte counts toward an upload limit, marginal otherwise.</p>
+
+<h2>When silent video is the right call</h2>
+<ul>
+<li><b>Website hero backgrounds:</b> Autoplaying background videos should always be muted — browsers block autoplay with sound anyway. Stripping the track saves bandwidth for every visitor.</li>
+<li><b>GIF-style loops:</b> If you're converting to a muted MP4 loop for chat, remove audio first so the encoder doesn't waste bits on a track nobody will hear.</li>
+<li><b>Before adding your own soundtrack:</b> Strip the original audio, then mux your music in an editor. Cleaner than trying to mix over it.</li>
+<li><b>Privacy:</b> Background conversations, TV audio, location-revealing sounds — removing the track is more reliable than hoping nobody listens closely.</li>
+<li><b>Platform requirements:</b> Some ad platforms and digital signage systems reject files with audio tracks entirely.</li>
+</ul>
+
+<h2>What "mute" doesn't do (common misconception)</h2>
+<p>Lowering your player's volume, muting a timeline track in an editor without re-exporting, or setting a video element to <code>muted</code> in HTML does <b>not</b> remove the audio data. The full audio track is still in the file — anyone who downloads it can unmute it. Real removal means writing a new file with <code>-an</code> (no audio). If privacy is the goal, verify: open the output in a player and check it has no audio track listed, or check the file size dropped.</p>
+
+<h2>Keeping audio but making it smaller</h2>
+<p>Sometimes you want quiet background audio, just smaller. Instead of removing it entirely: drop stereo to mono (halves audio size, fine for voice), lower AAC to 64-96k, or convert 5.1 surround to stereo. A 2-hour movie's audio goes from 600MB to 70MB this way — most of the savings of removal with the soundtrack intact.</p>
+
+<h2>Frequently asked questions</h2>
+<h3>Is removing audio reversible?</h3>
+<p>No — the output file simply has no audio track. Keep your original if you might want the sound back later. The operation itself doesn't touch your source file.</p>
+<h3>Why did my file barely shrink after removing audio?</h3>
+<p>The source probably had a low-bitrate audio track (phone recordings often use 64-96k). Audio was only 2-3% of that file. Removal saves the most on files with high-quality or surround audio.</p>
+<h3>Can I remove audio from only part of a video?</h3>
+<p>Not in one click — that requires splitting the video, muting the section, and rejoining. For a quick workaround, extract the full audio, mute the section in Audacity (free), and mux it back. For simple cases, trimming the unwanted section out entirely is easier.</p>
+<h3>Does removing audio affect video quality?</h3>
+<p>With remux (stream copy), zero effect — the video bytes are untouched. With re-encode, there's the normal tiny quality cost of re-encoding, same as any conversion.</p>
+<h3>Which formats support the instant remux method?</h3>
+<p>MP4 to MP4 and MOV to MP4 work instantly. WebM to WebM also remuxes cleanly. Cross-format (like MOV to WebM) always needs a full re-encode.</p>
+<h3>Can I remove just one audio language and keep another?</h3>
+<p>Multi-track files need stream selection (<code>-map</code> in FFmpeg) which our quick toggle doesn't expose. The "Remove audio" checkbox strips all audio tracks. For selective removal, desktop FFmpeg with <code>-map 0:v -map 0:a:0</code> keeps only the first audio stream.</p>
+
+<div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
     <p style="margin-top:22px"><a href="/#articles" style="color:var(--primary);text-decoration:none">← Back to all guides</a></p>
   </div>
 </main>

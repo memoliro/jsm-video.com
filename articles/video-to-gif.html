@@ -463,6 +463,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Why does my GIF look worse than the video?",
+     "acceptedAnswer": {"@type": "Answer", "text": "256 colors. Gradients, skin tones, and dark scenes suffer most. A GIF will never match video fidelity."}},
+    {"@type": "Question", "name": "Can I add text or captions to my GIF?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Add captions in a video editor before converting. Burned-in text survives GIF conversion perfectly."}},
+    {"@type": "Question", "name": "How do I make a GIF loop seamlessly?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Pick a clip where first and last frames are similar, or reverse the second half boomerang-style to hide the seam."}},
+    {"@type": "Question", "name": "Why is my GIF not animating?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Some platforms show only the first frame until tapped. Outlook desktop never animates GIFs."}},
+    {"@type": "Question", "name": "Is APNG or WebP animation better than GIF?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Technically yes, but support is spotty in chat apps. GIF remains the only format that animates everywhere."}},
+    {"@type": "Question", "name": "Can I convert a GIF back to video?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes — GIF to MP4 is 5-10x smaller and far more practical, though quality won't improve."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -508,6 +530,65 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 
 <h2>Private by design</h2>
 <p>Your video never leaves your device — conversion runs locally with ffmpeg.wasm. Handy for memes made from personal footage you don't want on a stranger's server.</p>
+
+
+<h2>Why GIFs get huge (and how to fight it)</h2>
+<p>Three technical facts explain every oversized GIF:</p>
+<ol>
+<li><b>256 colors only.</b> The GIF format stores a palette of at most 256 colors per frame. Photographic content with gradients dithers badly and compresses poorly.</li>
+<li><b>No temporal compression.</b> Video codecs store only the <i>changes</i> between frames. GIF stores each frame nearly fully. Ten seconds at 10 fps is 100 mostly-full images.</li>
+<li><b>No audio, ever.</b> The sound is simply discarded — which is fine for reactions, fatal for anything else.</li>
+</ol>
+<p>The practical formula: <b>duration × fps × width</b> determines size. Halving any one of them roughly halves the file. A 10-second 480p GIF at 10 fps is ~8-12MB. Cut to 5 seconds and you're at ~4-6MB. Drop to 8 fps and 400px wide and you're under 3MB.</p>
+
+<h2>Trimming: the highest-leverage step</h2>
+<p>Most GIF failures come from converting a whole 2-minute video. Nobody watches a 2-minute GIF. Before converting:</p>
+<ul>
+<li>Find the 3-8 second moment that matters — the reaction, the punchline, the demo step.</li>
+<li>Trim it in the converter's Trim tab (or any editor), <i>then</i> convert the trimmed clip to GIF.</li>
+<li>Start the clip half a second before the action — GIFs loop, and a clean loop point makes it feel seamless.</li>
+</ul>
+<p>Trimming first also speeds up conversion dramatically: the encoder processes 5 seconds instead of 120.</p>
+
+<h2>Quality settings that actually help</h2>
+<ul>
+<li><b>FPS:</b> 10 fps is the sweet spot. Below 8 looks choppy; above 15 balloons the size for little visible gain on short loops.</li>
+<li><b>Width:</b> 480px for chat and social. 320px for tiny inline reactions. Never go above 640px — the size explodes and nobody sees the difference at chat scale.</li>
+<li><b>Dithering:</b> Our converter applies diffusion dithering automatically, which hides the 256-color banding in gradients. It adds slight grain but looks far better than flat banding.</li>
+<li><b>Source quality:</b> Start from the highest-quality source you have. A crisp 1080p source downscaled to 480p GIF looks much better than a 480p source — downscaling averages out noise and compression artifacts.</li>
+</ul>
+
+<h2>GIF vs muted MP4 vs WebM: the honest comparison</h2>
+<p>For the same 5-second 480p clip: GIF ~5MB, muted MP4 ~0.8MB, muted WebM ~0.6MB. The MP4 looks better (millions of colors, real compression) and plays everywhere video plays. So when should you still use GIF?</p>
+<ul>
+<li><b>Use GIF:</b> Chat apps and feeds where it must behave like an image — auto-playing, looping, no player chrome. Discord, Slack, X, iMessage, email signatures.</li>
+<li><b>Use muted MP4:</b> Your own website, documentation, tutorials. The <code>&lt;video autoplay muted loop playsinline&gt;</code> tag gives you GIF behavior at a tenth of the size, plus playback controls for accessibility.</li>
+<li><b>Use WebM:</b> Same as MP4 but smaller — when you know the audience uses modern browsers.</li>
+</ul>
+
+<h2>Platform limits cheat sheet</h2>
+<ul>
+<li><b>Discord:</b> 8MB free (up to 25MB with boosts, 500MB Nitro). GIFs must fit — trim aggressively.</li>
+<li><b>Slack:</b> 1GB on paid plans, but GIFs over ~10MB get sluggish in threads.</li>
+<li><b>X (Twitter):</b> GIFs up to 15MB, 15 seconds max. Larger uploads get converted to video anyway.</li>
+<li><b>iMessage:</b> No hard cap, but huge GIFs are slow to send and eat data.</li>
+<li><b>WhatsApp:</b> Converts GIFs to muted MP4 automatically ("video" messages that loop). Sending a small MP4 yourself skips their recompression.</li>
+<li><b>Reddit:</b> Native GIF/video uploads handle both; keep under ~1GB but aim far lower for fast loading.</li>
+</ul>
+
+<h2>Frequently asked questions</h2>
+<h3>Why does my GIF look worse than the video?</h3>
+<p>256 colors. Gradients, skin tones, and dark scenes suffer most. Dithering helps, but a GIF will never match video fidelity — that's the format's fundamental limit.</p>
+<h3>Can I add text or captions to my GIF?</h3>
+<p>Not in the converter directly — add captions in a video editor (CapCut, Premiere) before converting. Burned-in text survives GIF conversion perfectly since it's just pixels.</p>
+<h3>How do I make a GIF loop seamlessly?</h3>
+<p>Pick a clip where the first and last frames are similar — a full action cycle (a jump, a wave). Avoid hard cuts at the loop point; they read as glitches. Some creators reverse the second half (boomerang style) to hide the seam.</p>
+<h3>Why is my GIF not animating?</h3>
+<p>Some platforms show only the first frame until you tap (iMessage in low-data mode, some email clients). Outlook desktop famously never animates GIFs. For email, link to the GIF or accept the static fallback.</p>
+<h3>Is APNG or WebP animation better than GIF?</h3>
+<p>Technically yes — APNG supports full color and transparency, animated WebP is 20-30% smaller than GIF. But support is spotty in chat apps. GIF remains the only format that animates absolutely everywhere.</p>
+<h3>Can I convert a GIF back to video?</h3>
+<p>Yes — GIF to MP4 gives you a real video file, 5-10x smaller, which you can then edit, add sound to, or upload anywhere. Quality won't improve (the 256-color limit is baked in), but the file becomes far more practical.</p>
 
 <p><a href="/" class="btn btn-blue" style="display:inline-flex;margin-top:8px">Make a GIF from your video →</a></p>
 </main>

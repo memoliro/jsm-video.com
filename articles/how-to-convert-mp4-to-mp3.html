@@ -463,6 +463,28 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 // Early theme
 (function(){try{var s=localStorage.getItem('theme');if(!s){s=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',s);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();
 </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Will converting MP4 to MP3 reduce audio quality?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Slightly, because MP3 is lossy. At 192 kbps the loss is inaudible to most listeners. For zero loss, extract to WAV or FLAC instead."}},
+    {"@type": "Question", "name": "Can I convert MP3 back to MP4?",
+     "acceptedAnswer": {"@type": "Answer", "text": "You can put MP3 audio in an MP4 container, but you'll get audio-only playback with a black screen unless you add a still image as the video track."}},
+    {"@type": "Question", "name": "What's the smallest format for voice recordings?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Opus at 32 kbps mono — about 0.24MB per minute. For universal compatibility, MP3 at 64k mono is the safe pick."}},
+    {"@type": "Question", "name": "Why is my MP3 much smaller than the MP4?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Video is typically 80-95% of a file's size. Removing it leaves only the audio stream."}},
+    {"@type": "Question", "name": "Does the tool keep audio metadata like title and artist?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Basic conversion preserves the audio stream but not always container-level tags. Add metadata afterward in your music player if needed."}},
+    {"@type": "Question", "name": "Is there a file size limit for extraction?",
+     "acceptedAnswer": {"@type": "Answer", "text": "The practical browser limit is around 1GB. Very large files take time and memory — split long recordings first if you hit issues."}}
+  ]
+}
+</script>
+
 </head>
 <body>
 <header style="border-bottom:1px solid var(--border);background:var(--bg-elevated);position:sticky;top:0;z-index:10">
@@ -521,7 +543,53 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 <li>Need exact timing? Trim first in a video editor, then extract.</li>
 </ul>
 
-    <div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
+    
+<h2>MP3 vs AAC vs WAV vs FLAC: which audio format do you actually need?</h2>
+<p>MP3 is the safe default — everything plays it. But it's not always the best choice:</p>
+<ul>
+<li><b>MP3:</b> Universal. Every device since 1998 plays MP3. Best for sharing, podcasts, ringtones, car stereos. The only downside: it's an older codec, so it needs slightly higher bitrates than AAC for the same quality.</li>
+<li><b>AAC (.m4a):</b> Better quality per bit than MP3. Native on iPhones and all Apple devices. If your audience is mostly on iOS, AAC at 128k sounds like MP3 at 192k. YouTube and most streaming services use AAC-family codecs internally.</li>
+<li><b>WAV:</b> Uncompressed. Huge files (about 10MB per minute), but zero quality loss and instant seeking. Use only as an intermediate for editing in Audacity, Premiere, or DaVinci Resolve — never for sharing.</li>
+<li><b>FLAC:</b> Lossless compression — bit-for-bit identical to the source, but 50-60% smaller than WAV. Best for archiving music you care about. Plays on Android and most desktop players, but not on iPhones without a third-party app.</li>
+<li><b>OGG Vorbis / Opus:</b> Great for Discord, gaming, and voice chat. Opus is the best codec for speech at low bitrates (even 32k sounds decent).</li>
+</ul>
+
+<h2>Bitrate deep dive: what your ears can actually hear</h2>
+<p>Bitrate is kilobits per second of audio data. Higher means more detail preserved — but only up to the point where your ears can't tell the difference (transparency).</p>
+<ul>
+<li><b>64-96 kbps:</b> Fine for spoken word. Podcasts at 96k mono sound clean and take ~0.7MB per minute.</li>
+<li><b>128 kbps:</b> The transparency threshold for most casual listening on earbuds or laptop speakers.</li>
+<li><b>192 kbps:</b> Transparent for the vast majority of listeners, even on good headphones. This is why it's our default.</li>
+<li><b>256-320 kbps:</b> Only matters for critical listening on high-end gear, or for archiving. Above 192k, differences are measurable in lab tests but rarely audible in practice.</li>
+</ul>
+<p>One caveat: you can't improve quality by converting upward. A 128k source re-encoded at 320k just makes a bigger file with the same 128k quality. Always extract from the best source you have.</p>
+
+<h2>VBR vs CBR: variable vs constant bitrate</h2>
+<p>CBR (constant bitrate) uses the same data rate for every second — simple, predictable file sizes. VBR (variable bitrate) spends more bits on complex passages (a full orchestra hit) and fewer on simple ones (silence between sentences). VBR at the same average bitrate almost always sounds better. For music archiving, use VBR quality setting V0 (roughly 220-260k average). For predictable sizes (fitting a CD or a message limit), use CBR.</p>
+
+<h2>Extracting from tricky sources</h2>
+<ul>
+<li><b>MKV or WebM files:</b> Same process — the tool reads whatever audio stream is inside and converts it. No extra steps.</li>
+<li><b>Multiple audio tracks:</b> Some videos (movies, recordings) have two or more audio streams — different languages or commentary. FFmpeg extracts the first (default) track. If you need a different one, a desktop FFmpeg command with <code>-map 0:a:1</code> selects the second audio stream.</li>
+<li><b>5.1 surround sound:</b> Converting to MP3 downmixes to stereo automatically. For archiving surround, use FLAC or keep the original AAC 5.1.</li>
+<li><b>Very long videos:</b> A 3-hour lecture extracts fine — it just takes a few minutes since the whole file must be decoded. Keep the tab in the foreground.</li>
+</ul>
+
+<h2>Frequently asked questions</h2>
+<h3>Will converting MP4 to MP3 reduce audio quality?</h3>
+<p>Slightly, because MP3 is lossy. At 192 kbps the loss is inaudible to most listeners. If you need zero loss, extract to WAV or FLAC instead.</p>
+<h3>Can I convert MP3 back to MP4?</h3>
+<p>You can put MP3 audio into an MP4 container, but you'll get audio-only playback with a black screen — MP4 players expect video. For a proper video file you'd need to add a still image as the video track.</p>
+<h3>What's the smallest format for voice recordings?</h3>
+<p>Opus at 32 kbps mono — about 0.24MB per minute with surprisingly clear speech. For universal compatibility, MP3 at 64k mono is the safe pick.</p>
+<h3>Why is my MP3 much smaller than the MP4?</h3>
+<p>Video is typically 80-95% of a file's size. Removing it leaves only the audio stream, so a 500MB lecture becomes a 30MB MP3.</p>
+<h3>Does the tool keep audio metadata like title and artist?</h3>
+<p>Basic conversion preserves the audio stream but not always container-level tags. If metadata matters, add it afterward in your music player or with a tag editor.</p>
+<h3>Is there a file size limit for extraction?</h3>
+<p>The practical browser limit is around 1GB. Extraction needs to decode the full video, so very large files take time and memory — split long recordings first if you hit issues.</p>
+
+<div class="pro-tip"><b>Try it privately:</b> Open <a href="/" style="color:var(--primary)">JSM-Video.com</a> — drag your file, choose output, convert. Nothing leaves your device. The engine runs with ffmpeg.wasm directly in your browser.</div>
     <p style="margin-top:22px"><a href="/#articles" style="color:var(--primary);text-decoration:none">← Back to all guides</a></p>
   </div>
 </main>
