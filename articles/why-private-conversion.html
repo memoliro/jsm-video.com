@@ -395,17 +395,25 @@ input[type="color"] { padding: 2px; width: 44px; height: 38px; cursor: pointer; 
 
 footer {
   background: var(--card); border-top: 1px solid var(--border);
-  margin-top: 56px; padding: 36px 0; font-size: 0.8125rem; color: var(--muted);
+  margin-top: 56px; padding: 48px 0 28px; font-size: 0.875rem; color: var(--muted);
 }
-.footer-inner {
-  display: flex; justify-content: space-between; align-items: center;
-  flex-wrap: wrap; gap: 16px;
+.footer-grid {
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 40px;
 }
-.footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
-.footer-links a { color: var(--muted); font-weight: 500; }
-.footer-links a:hover { color: var(--text); }
-.footer-more { align-items: center; font-size: 0.8125rem; }
-.footer-more span { color: var(--muted); font-weight: 600; }
+.footer-brand .footer-logo { font-weight: 800; font-size: 1.125rem; color: var(--text); margin-bottom: 10px; }
+.footer-brand p { line-height: 1.6; margin: 0 0 12px; }
+.footer-col h4 {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text); margin: 0 0 14px;
+}
+.footer-col a { display: block; color: var(--muted); font-weight: 500; margin-bottom: 10px; text-decoration: none; }
+.footer-col a:hover { color: var(--text); }
+.footer-bottom {
+  margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--border);
+  font-size: 0.8125rem; text-align: center;
+}
+@media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .footer-grid { grid-template-columns: 1fr; gap: 28px; } }
 
 .section-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
 .mt-5 { margin-top: 20px; }
@@ -596,24 +604,43 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 </main>
 <footer>
   <div class="wrap">
-    <div class="footer-inner">
-      <div>&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
-      <div class="footer-links">
-        <a href="/">Converter</a>
-        <a href="/#articles">Articles</a>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">JSM-Video</div>
+        <p>Free video toolkit &mdash; convert, trim, bleep-censor and subtitle your videos. 100% private: everything runs in your browser, nothing is uploaded.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <a href="/">Video Converter</a>
+        <a href="/#trim">Video Trimmer</a>
+        <a href="/#bleep">Bleep Censor</a>
+        <a href="/subtitle/">Subtitle Tools</a>
+      </div>
+      <div class="footer-col">
+        <h4>Guides</h4>
+        <a href="/articles/how-to-convert-mp4-to-mp3.html">MP4 to MP3</a>
+        <a href="/articles/how-to-compress-video.html">Compress Video</a>
+        <a href="/articles/video-to-gif.html">Video to GIF</a>
+        <a href="/articles/mov-to-mp4.html">MOV to MP4</a>
+        <a href="/articles/how-to-remove-audio.html">Remove Audio</a>
+        <a href="/articles/mp4-vs-mov-vs-gif.html">MP4 vs MOV vs GIF</a>
+      </div>
+      <div class="footer-col">
+        <h4>Free tools</h4>
+        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
+        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
+        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
+        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
         <a href="/about.html">About</a>
         <a href="/contact.html">Contact</a>
         <a href="/privacy-policy.html">Privacy</a>
         <a href="/terms.html">Terms</a>
       </div>
-      <div class="footer-links footer-more">
-        <span>More free tools:</span>
-        <a href="https://jsm-options.com/" target="_blank" rel="noopener">JSM Options</a>
-        <a href="https://jsm-image.com/" target="_blank" rel="noopener">JSM Image</a>
-        <a href="https://jsm-loudness.com/" target="_blank" rel="noopener">JSM Loudness</a>
-        <a href="https://lyricprep.com/" target="_blank" rel="noopener">LyricPrep</a>
-      </div>
     </div>
+    <div class="footer-bottom">&copy; 2026 JSM-Video.com &middot; Private by design &mdash; your files never leave your device</div>
   </div>
 </footer>
 <script>
