@@ -1042,7 +1042,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                 <div style="display:grid;gap:8px">
                   <button id="bSaveBtn" class="btn btn-green">💾 Save video</button>
                   <button id="bNewBtn" class="btn btn-ghost">Choose another file</button>
-                  <a id="bDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+                  <a id="bDownload" class="btn btn-green" style="display:none;text-decoration:none;text-align:center" href="#">⬇ Download edited video</a>
                 </div>
                 <div id="bStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
               </aside>
@@ -2981,8 +2981,8 @@ async function saveBleep() {
     bDownload.href = URL.createObjectURL(new Blob([data], { type: 'video/mp4' }));
     bDownload.download = outName;
     const sizeLabel = data.length < 1048576 ? `${Math.max(1, Math.round(data.length / 1024))} KB` : `${(data.length / 1048576).toFixed(1)} MB`;
-    bDownload.textContent = `⬇ Download ${outName} (${sizeLabel})`;
-    bDownload.style.display = 'inline-block';
+    bDownload.innerHTML = `⬇ Download edited video<br><span style="font-size:12px;font-weight:400;opacity:.85">${escapeHtml(outName)} (${sizeLabel})</span>`;
+    bDownload.style.display = 'block';
     bProgressBar.style.width = '100%';
     const cens = bRegions.reduce((a, r) => a + (r.e - r.s), 0);
     const how = mode === 'mute' ? 'Muted' : mode === 'beep' ? 'Beep' : 'Custom sound';
