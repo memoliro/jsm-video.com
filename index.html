@@ -1687,7 +1687,7 @@ function renderVWork(item) {
       vPrevPlayer.dataset.fid = item.id;
     }
   }
-  vPrevMeta.innerHTML = `<b>${escapeHtml(item.file.name)}</b> &nbsp;·&nbsp; ${fmtSize(item.file.size)} &nbsp;·&nbsp; <span class="status-pill status-${item.status}">${item.status}</span>`;
+  vPrevMeta.innerHTML = `<b>${escapeHtml(item.file.name)}</b> &nbsp;·&nbsp; ${fmtSize(item.file.size)} &nbsp;·&nbsp; <span class="status-pill status-${item.status}">${item.status}</span>` + (item.file.size > 200 * 1024 * 1024 ? `<br><span style="color:#e8a13a;font-size:12px">⚠️ Large file — it converts entirely in your browser's memory, so the final step may take a while. Choosing 720p resolution is faster and safer for files this size.</span>` : '');
   if (vOutSel.value !== item.out) vOutSel.value = item.out;
   const busy = item.status === 'converting' || batchConverting;
   const canConvert = (loaded || item.out === 'wav') && !busy;
@@ -2011,8 +2011,10 @@ async function convertV(id) {
     let data;
     if (!usedFastCopy) {
       await ffmpeg.exec(args);
+      vStatus.textContent = 'Writing file… (large files can take a minute here)';
       data = await ffmpeg.readFile(outName);
     } else {
+      vStatus.textContent = 'Writing file…';
       data = await ffmpeg.readFile(outName);
       vStatus.textContent = 'Done via fast remux (instant)!';
     }
