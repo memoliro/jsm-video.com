@@ -624,8 +624,16 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
 .tl-strip img { flex: 1 1 0; min-width: 0; height: 100%; object-fit: cover; pointer-events: none; }
 .tl-dim { position: absolute; top: 0; bottom: 0; background: rgba(2,6,16,.62); pointer-events: none; }
 .tl-selbox { position: absolute; top: 0; bottom: 0; border-top: 2px solid #60a5fa; border-bottom: 2px solid #60a5fa; pointer-events: none; box-sizing: border-box; }
-.tl-handle { position: absolute; top: 0; bottom: 0; width: 10px; margin-left: -5px; background: #60a5fa; border-radius: 5px; cursor: ew-resize; touch-action: none; display: flex; align-items: center; justify-content: center; z-index: 3; }
-.tl-handle::after { content: ''; width: 4px; height: 22px; border-left: 2px solid rgba(255,255,255,.85); border-right: 2px solid rgba(255,255,255,.85); }
+.tl-handle { position: absolute; top: 0; bottom: 0; width: 14px; margin-left: -7px; background: #60a5fa; border-radius: 6px; cursor: ew-resize; touch-action: none; display: flex; align-items: center; justify-content: center; z-index: 3; box-shadow: 0 0 0 1.5px rgba(255,255,255,.8), 0 2px 8px rgba(0,0,0,.5); }
+.tl-handle::after { content: ''; width: 4px; height: 22px; border-left: 2px solid rgba(255,255,255,.9); border-right: 2px solid rgba(255,255,255,.9); }
+/* Touch devices: much wider handles plus an invisible ~48px grab zone around
+   each one, so a thumb can catch the handle without pixel-perfect aim. */
+@media (pointer: coarse) {
+  .tl-handle { width: 24px; margin-left: -12px; border-radius: 8px; }
+  .tl-handle::before { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; width: 48px; transform: translateX(-50%); }
+  .tl-handle::after { height: 32px; }
+  .tl-handle:active { background: #3b82f6; }
+}
 .tl-handle:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
 .tl-cuts { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .tl-cut { position: absolute; top: 0; bottom: 0; background: rgba(239,68,68,.45); border-left: 1px solid #ef4444; border-right: 1px solid #ef4444; }
