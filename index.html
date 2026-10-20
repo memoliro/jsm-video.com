@@ -794,7 +794,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
             <option value="aiff">AIFF - Apple Lossless</option>
             <option value="alac">ALAC - Apple Lossless</option>
           </optgroup>
-        </select></select></div>
+        </select></div>
                 <div class="tField"><span>Rotate</span>
                   <select id="vRotate" aria-label="Rotate video">
                     <option value="0" selected>0°</option>
@@ -808,6 +808,17 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                     <option value="small">📦 Smaller file</option>
                     <option value="balanced" selected>⚖️ Balanced</option>
                     <option value="high">🎬 High quality</option>
+                  </select>
+                </div>
+                <div class="tField"><span>Resolution</span>
+                  <select id="vResolution" aria-label="Output resolution" title="Lower resolution converts much faster and gives a smaller file.">
+                    <option value="original" selected>Original</option>
+                    <option value="2160">2160p 4K</option>
+                    <option value="1080">1080p Full HD</option>
+                    <option value="720">720p HD</option>
+                    <option value="480">480p SD</option>
+                    <option value="360">360p Low</option>
+                    <option value="240">240p Tiny</option>
                   </select>
                 </div>
                 <label class="tCheck"><input type="checkbox" id="vFlipH"> ↔ Flip horizontally</label>
@@ -1425,6 +1436,29 @@ async function loadCoreFrom() {
   }
   throw lastErr || new Error('All FFmpeg CDN fallbacks failed. Check if cdn.jsdelivr.net / unpkg.com are blocked by adblocker.');
 }
+
+// Warm the browser cache with the FFmpeg core files shortly after page load,
+// so the first conversion doesn't stall on a ~25-31 MB download. Uses the
+// exact URLs loadCoreFrom() tries first, so the loader's fetches hit cache.
+let enginePrefetchStarted = false;
+function prefetchEngineCore() {
+  if (enginePrefetchStarted) return;
+  enginePrefetchStarted = true;
+  try {
+    const mt = window.crossOriginIsolated === true;
+    const pkg = mt ? '@ffmpeg/core-mt' : '@ffmpeg/core';
+    const base = `https://cdn.jsdelivr.net/npm/${pkg}@0.12.6/dist/esm`;
+    const files = ['ffmpeg-core.js', 'ffmpeg-core.wasm'];
+    if (mt) files.push('ffmpeg-core.worker.js');
+    files.forEach(f => { fetch(`${base}/${f}`).then(r => r.blob()).catch(() => {}); });
+  } catch {}
+}
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    if ('requestIdleCallback' in window) requestIdleCallback(prefetchEngineCore, { timeout: 6000 });
+    else prefetchEngineCore();
+  }, 2000);
+});
 
 async function loadFFmpeg(forceFresh = false) {
   if (loaded && !forceFresh) return;
@@ -2335,7 +2369,7 @@ async function saveVideo() {
     outName = fast ? `edited-${safeBase}.${ext}` : `edited-${safeBase}.mp4`;
     const segArgs = (ss, ee, target) => fast
       ? ['-ss', ss.toFixed(3), '-i', inName, '-t', (ee - ss).toFixed(3), '-c', 'copy', target]
-      : ['-i', inName, '-ss', ss.toFixed(3), '-t', (ee - ss).toFixed(3), '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-c:a', 'aac', target];
+      : ['-ss', ss.toFixed(3), '-i', inName, '-t', (ee - ss).toFixed(3), '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-c:a', 'aac', target];
     let data;
     if (segs.length === 1) {
       const [ss, ee] = segs[0];
