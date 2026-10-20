@@ -1931,7 +1931,7 @@ async function convertV(id) {
       return filters.length ? filters.join(',') : null;
     };
     const scaleFilter = getVideoFilters();
-    const preset = qmode === 'small' ? 'ultrafast' : qmode === 'high' ? 'medium' : 'veryfast';
+    const preset = qmode === 'small' ? 'ultrafast' : qmode === 'high' ? 'medium' : 'superfast';
     const crf = qmode === 'small' ? '30' : qmode === 'high' ? '19' : '24';
     const audioBR = qmode === 'small' ? '96k' : qmode === 'high' ? '192k' : '128k';
     const mp3q = qmode === 'small' ? '5' : qmode === 'high' ? '2' : '4';
