@@ -949,7 +949,7 @@ button:focus:not(:focus-visible), select:focus:not(:focus-visible) { outline: no
                   <button id="tDeleteBtn" class="btn btn-blue">🗑️ Delete selection</button>
                   <button id="tSaveBtn" class="btn btn-green">💾 Save video</button>
                   <button id="tNewBtn" class="btn btn-ghost">Choose another file</button>
-                  <a id="tDownload" class="btn" style="display:none;text-decoration:none" href="#">⬇ Download</a>
+                  <a id="tDownload" class="btn btn-green" style="display:none;text-decoration:none;text-align:center" href="#">⬇ Download edited video</a>
                   <button id="tToConverter" class="btn" style="display:none">↗ Convert / flip</button>
                 </div>
                 <div id="tStatus" class="status-line" aria-live="polite" style="margin-top:10px"></div>
@@ -2402,8 +2402,8 @@ async function saveVideo() {
     tDownload.href = URL.createObjectURL(new Blob([data.buffer], { type: mime }));
     tDownload.download = outName;
     const sizeLabel = data.length < 1048576 ? `${Math.max(1, Math.round(data.length / 1024))} KB` : `${(data.length / 1048576).toFixed(1)} MB`;
-    tDownload.textContent = `⬇ Download ${outName} (${sizeLabel})`;
-    tDownload.style.display = 'inline-block';
+    tDownload.innerHTML = `⬇ Download edited video<br><span style="font-size:12px;font-weight:400;opacity:.85">${escapeHtml(outName)} (${sizeLabel})</span>`;
+    tDownload.style.display = 'block';
     tLastOutput = { data, mime, name: outName };
     tToConverter.style.display = 'inline-block';
     tProgressBar.style.width = '100%';
